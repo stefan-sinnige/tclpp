@@ -8,6 +8,9 @@
 
 ======================================================================
 
+2.0     [June 28, 2000]
+	- support or Windows platforms
+
 2.0b2   [Feb 12, 2000]
 	- The object command is now available in constructors
 	- Base class variables accessible in derived classes
