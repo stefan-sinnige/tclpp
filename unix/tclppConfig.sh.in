@@ -1,0 +1,96 @@
+# tclppConfig.sh --
+#
+# This shell script (for sh) is generated automatically by Tclpp's
+# configure script. It will create shell variables for most of the
+# configuration options discovered by the configure script.
+# 
+# This script is intended to be included by the configure scripts
+# for Tclpp extensions so that they don't have to figure this all
+# out for themselves.
+#
+# The information in this file is specific to a single platform.
+#
+# $Id: tclppConfig.sh.in,v 1.3 2000/06/29 21:14:26 stefan Exp $
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published 
+# by the Free Software Foundation; either version 2.1 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+#
+# For the full GNU Lesser General Public License, see the 'LICENSE' file.
+
+# Tclpp version information
+TCLPP_VERSION='@TCLPP_VERSION@'
+TCLPP_MAJOR_VERSION='@TCLPP_MAJOR_VERSION@'
+TCLPP_MINOR_VERSION='@TCLPP_MINOR_VERSION@'
+TCLPP_PATCH_LEVEL='@TCLPP_PATCH_LEVEL@'
+
+# C-Compiler and flags to use. Special CFLAGS for a debug and full warning
+# build are provided if Tclpp hs been configured as such.
+TCLPP_C='@CC@'
+TCLPP_CFLAGS_DEBUG='@TCLPP_CFLAGS_DEBUG@'
+TCLPP_CFLAGS_WARNING='@TCLPP_CFLAGS_WARNING@'
+
+# The name of the Tclpp library (either static or dynamic).
+TCLPP_LIB_FILE='@TCLPP_LIB_FILE@'
+
+# String to pass to the linker to pick up the Tclpp extension from its
+# build location.
+TCLPP_BUILD_LIB_SPEC='@TCLPP_BUILD_LIB_SPEC@'
+
+# ======================================================================
+# The following are actually copied from the tclConfig.sh used when
+# building this release of Tclpp. 
+# ======================================================================
+
+# -D flags for use with the C compiler.
+TCL_DEFS='@TCL_DEFS@'
+
+# If TCL was built with debugging symbols, generated libraries contain
+# this string at the end of the library name (before the extension).
+TCL_DBGX='@TCL_DBGX@'
+
+# String to pass to linker to pick up the Tcl library from its
+# installed directory.
+TCL_LIB_SPEC='@TCL_LIB_SPEC@'
+
+# Additional libraries to use when linking Tcl.
+TCL_LIBS='-ldl  -lm'
+
+# Location of the top-level source directory from which Tcl was built.
+# This is the directory that contains a README file as well as
+# subdirectories such as generic, unix, etc.  If Tcl was compiled in a
+# different place than the directory containing the source files, this
+# points to the location of the sources, not the location where Tcl was
+# compiled.
+TCL_SRC_DIR='@TCL_SRC_DIR@'
+
+# Flags to pass to cc when compiling the components of a shared library:
+TCL_SHLIB_CFLAGS='@TCL_SHLIB_CFLAGS@'
+
+# Base command to use for combining object files into a shared library:
+TCL_SHLIB_LD='@TCL_SHLIB_LD@'
+
+# Library file(s) to include in tclsh and other base applications
+# in order to provide facilities needed by DLOBJ above.
+TCL_DL_LIBS='@TCL_DL_LIBS@'
+
+# Flags to pass to the compiler when linking object files into
+# an executable tclsh or tcltest binary.
+TCL_LD_FLAGS='@TCL_LD_FLAGS@'
+
+# Flags to pass to ld, such as "-R /usr/local/tcl/lib", that tell the
+# run-time dynamic linker where to look for shared libraries such as
+# libtcl.so.  Used when linking applications.  Only works if there
+# is a variable "LIB_RUNTIME_DIR" defined in the Makefile.
+TCL_LD_SEARCH_FLAGS='@TCL_LD_SEARCH_FLAGS@'
+

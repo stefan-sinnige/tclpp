@@ -1,0 +1,189 @@
+# -----------------------------------------------------------------------------
+#
+# instance-names.test --
+#     
+#     This file contains tests to validate reference section 4.1
+#
+# RCS: $Id: instance-variables.test,v 1.1 1999/09/16 18:13:20 stefan Exp $
+#
+# Copyright (C) 1998-1999, Stefan Sinnige.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#
+# For the full GNU General Public License
+#
+# -----------------------------------------------------------------------------
+
+if {[string compare test [info commands test]] == 1} {
+    error "This test requires the 'tclpptest' shell."
+    exit 1
+}
+
+set SECTION 4.2
+
+# -----------------------------------------------------------------------------
+
+test instance-variables-R-${SECTION}.1-1 \
+{
+    Scalar types are defaulted to an empty string.
+} \
+{
+    class A {
+        variable scalar a
+        proc func {} {
+            return $a
+        }
+    }
+    A a
+    a func
+} ""
+
+# -----------------------------------------------------------------------------
+
+test instance-variables-R-${SECTION}.1-1 \
+{
+    Special variable 'this' is defined to be the name of the instance
+} \
+{
+    class A {
+        proc func {} {
+            return $this
+        }
+    }
+    A a1
+    A a2
+    list [a1 func] [a2 func]
+} "::a1\
+   ::a2"
+
+# -----------------------------------------------------------------------------
+
+test instance-variables-R-${SECTION}.2-1 \
+{
+    Instance variables are accessible through the class procedures and
+    are distinct per instance. Test with scalars.
+} \
+{
+    class A {
+        proc setVars {value1 value2} {
+            set var1 $value1
+            set var2 $value2
+        }
+        proc getVars {} {
+            return [list $var1 $var2]
+        }
+        proc func {} {
+            return $this
+        }
+        variable scalar var1
+        variable scalar var2
+    }
+    A a1
+    A a2
+    a1 setVars 10 20
+    a2 setVars 30 40
+    list [a1 func] \
+         [a1 getVars] \
+         [a2 getVars]
+} "::a1\
+   {10 20}\
+   {30 40}"
+
+# -----------------------------------------------------------------------------
+
+test instance-variables-R-${SECTION}.2-2 \
+{
+    Instance variables are accessible through the class procedures and
+    are distinct per instance. Test with array.
+} \
+{
+    class A {
+        proc setVars {key value1 value2} {
+            set var1($key) $value1
+            set var2($key) $value2
+        }
+        proc getVars {key} {
+            return [list $var1($key) $var2($key)]
+        }
+        variable array var1
+        variable array var2
+    }
+    A a1
+    A a2
+    a1 setVars theKey 10 20
+    a2 setVars theKey 30 40
+    list [a1 getVars theKey] \
+         [a2 getVars theKey]
+} "{10 20}\
+   {30 40}"
+
+# -----------------------------------------------------------------------------
+
+test instance-variables-R-${SECTION}.2-3 \
+{
+    Instance variables are accessible through the class procedures and
+    are distinct per instance. Test with class variables.
+} \
+{
+    class A {
+        proc setVars {key value1 value2} {
+            set var1($key) $value1
+            set var2($key) $value2
+        }
+        proc getVars {key} {
+            return [list $var1($key) $var2($key)]
+        }
+        variable array var1
+        variable array var2
+    }
+    class B {
+        proc setVars {key value1 value2} {
+            a setVars $key $value1 $value2
+        }
+        proc getVars {key} {
+            return [a getVars $key]
+        }
+        variable A a
+    }
+    B b1
+    B b2
+    b1 setVars theKey 10 20
+    b2 setVars theKey 30 40
+    list [b1 getVars theKey] \
+         [b2 getVars theKey]
+} "{10 20}\
+   {30 40}"
+
+# -----------------------------------------------------------------------------
+
+test instance-variables-R-${SECTION}.2-4 \
+{
+    Instance variables are only accessible through the class procedures and
+    not linked through to global functions.
+} \
+{
+    proc global_func {} {
+        return $this
+    }
+    class A {
+        proc global_func {} {
+            return [::global_func]
+        }
+    }
+    A a1
+    a1 global_func
+} "can't read \"this\": no such variable"
+
+# vi: set ai expandtab ts=4:

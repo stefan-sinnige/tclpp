@@ -1,0 +1,44 @@
+'\"
+'\" Copyright (C) 1998-2000, Stefan Sinnige.
+'\"
+'\" This program is free software; you can redistribute it and/or
+'\" modify it under the terms of the GNU Lesser General Public
+'\" License as published by the Free Software Foundation; either
+'\" version 2.1 of the License, or (at your option) any later
+'\" version.
+'\"
+'\" This program is distributed in the hope that it will be
+'\" useful, but WITHOUT ANY WARRANTY; without even the implied
+'\" warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+'\" PURPOSE. See the GNU Lesser General Public License for more
+'\" details.
+'\"
+'\" You should have received a copy of the GNU Lesser General
+'\" Public License along with this program; if not, write to the
+'\" Free Software Foundation, Inc., 59 Temple Place, Suite 330,
+'\" Boston, MA 02111-1307, USA.
+'\"
+'\" For the full GNU Lesser General Public License, see the
+'\" 'LICENSE' file.
+'\"
+.TH delete n 2.0 Tclpp "Tclpp Built-In Commands"
+.BS
+.SH NAME
+delete \- Delete an instance of a class
+.SH SYNOPSIS
+\fBdelete\fR \fIobject\fR 
+.br
+\fIobject\fR \fBdelete\fR 
+.SH DESCRIPTION
+Delete the object entirely (including all its contents) and invoke the
+destructor of the object. The destructor of all its base classes and
+of all its variables will be called as well.
+.sp
+
+Two methods are supported. The first is a command called \fBdelete\fR
+and the other is calling an instance procedure called \fBdelete\fR. Both
+are equivalent.
+.SH AUTHOR(S)
+Stefan Sinnige (ssinnige@geocities.com)
+.SH SEE ALSO
+class(n), new(n)

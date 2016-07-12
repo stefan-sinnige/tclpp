@@ -1,0 +1,111 @@
+# -----------------------------------------------------------------------------
+#
+# instance-scoping.test --
+#     
+#     This file contains tests to validate class scoping
+#
+# RCS: $Id: instance-scoping.test,v 1.2 1999/09/16 18:40:29 stefan Exp $
+#
+# Copyright (C) 1998-1999, Stefan Sinnige.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#
+# For the full GNU General Public License
+#
+# -----------------------------------------------------------------------------
+
+if {[string compare test [info commands test]] == 1} {
+    error "This test requires the 'tclpptest' shell."
+    exit 1
+}
+
+set SECTION 4.4
+
+# -----------------------------------------------------------------------------
+
+test instance-scoping-R-${SECTION}.1-1 \
+{
+    Instances defined in a namespace are accessible through that namespace
+} \
+{
+    namespace eval A {
+	    class B {
+	    }
+        B b
+    }
+    A::B b
+    list [classinfo classes] \
+         [info commands b] \
+         [namespace eval A {info commands b}]
+} "::A::B\
+   b\
+   b"
+
+# -----------------------------------------------------------------------------
+
+test instance-scoping-R-${SECTION}.1-2 \
+{
+    Deleting a namespace which defines instances, will remove these
+    instances as well.
+} \
+{
+	class B {
+    }
+    namespace eval A {
+        B b
+    }
+    namespace delete A
+    A::b
+} "invalid command name \"A::b\""
+
+# -----------------------------------------------------------------------------
+
+test instance-names-R-${SECTION}.2-1 \
+{
+    Instances created in a global procedure become available in the global
+    namespace
+} \
+{
+    class A {}
+    proc create {} {
+        A a
+    }
+    create
+    list [info commands a] [info commands ::a]
+} "a\
+   ::a"
+
+# -----------------------------------------------------------------------------
+
+test instance-names-R-${SECTION}.2-2 \
+{
+    Instances created by a namespace procedure become a member of that
+    namespace, ven though it was called from a different namespace.
+} \
+{
+    class A {}
+    namespace eval P {
+        proc create {} {
+            A a
+        }
+    }
+    namespace eval N {
+        ::P::create
+    }
+    list [info commands P::a] 
+} "::P::a"
+
+# vi: set ai ts=4 expandtab:
+

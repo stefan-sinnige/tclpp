@@ -1,0 +1,173 @@
+# -----------------------------------------------------------------------------
+#
+# instance-names.test --
+#     
+#     This file contains tests to validate reference section 4.1
+#
+# RCS: $Id: instance-names.test,v 1.1 1999/09/16 18:13:20 stefan Exp $
+#
+# Copyright (C) 1998-1999, Stefan Sinnige.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#
+# For the full GNU General Public License
+#
+# -----------------------------------------------------------------------------
+
+if {[string compare test [info commands test]] == 1} {
+    error "This test requires the 'tclpptest' shell."
+    exit 1
+}
+
+set SECTION 4.1
+
+# -----------------------------------------------------------------------------
+
+test instance-names-R-${SECTION}.1-1 \
+{
+    Instances are created through the class instantiation function
+} \
+{
+    class A {
+    }
+    A a
+    list [info commands ::a] \
+         [objectinfo a isA] \
+         [namespace children :: a]
+} "::a\
+   ::A\
+   ::a"
+   
+# -----------------------------------------------------------------------------
+
+test instance-names-R-${SECTION}.2-1 \
+{
+    Instances are deleted explicitly
+} \
+{
+    class A {
+    }
+    A a
+    a delete
+    list [info commands ::a] \
+         [namespace children :: a]
+} "{}\
+   {}"
+   
+# -----------------------------------------------------------------------------
+
+test instance-names-R-${SECTION}.2-1 \
+{
+    Instances are deleted by deleting the surrounding namespace
+} \
+{
+    class A {
+    }
+    namespace eval Dummy {
+        A a
+    }
+    namespace delete Dummy
+    ::Dummy::a
+} "invalid command name \"::Dummy::a\""
+   
+# -----------------------------------------------------------------------------
+
+test instance-names-R-${SECTION}.3-1 \
+{
+    Instance name defined in the global namespace should be accessible by both
+    the instance name itself and the fully qualified instance name.
+} \
+{
+    class A {}
+    A a
+    list [info commands a] [info commands ::a]
+} "a\
+   ::a"
+
+# -----------------------------------------------------------------------------
+
+test instance-names-R-${SECTION}.3-2 \
+{
+    Instance name defined in any namespace should be accessible by both the 
+    instance name itself in the namespace and the fully qualified instance
+    name outside the namespace.
+} \
+{
+    namespace eval Dummy {
+        class A {}
+        A a
+    }
+    class A {} 
+    A a
+    list [namespace eval Dummy {namespace which -command a}] \
+         [namespace which -command a]
+} "::Dummy::a\
+   ::a"
+
+# -----------------------------------------------------------------------------
+
+test instance-names-R-${SECTION}.3-3 \
+{
+    Instance name cannot clash with a namespace of the same name
+} \
+{
+    namespace eval a {}
+    class A {}
+    A a
+} "can't create namespace \"::a\": already exists"
+
+# -----------------------------------------------------------------------------
+
+test instance-names-R-${SECTION}.4-1 \
+{
+    Instances can be defined only ones.
+} \
+{
+    class A {}
+    A a
+    A a
+} "instance \"::a\" already exists"
+
+# -----------------------------------------------------------------------------
+
+test instance-names-R-${SECTION}.5-1 \
+{
+    Instances cannot interfere with already existing commands
+} \
+{
+    proc a {} {
+    }
+    class A {}
+    A a
+} "command \"::a\" already exists"
+
+# -----------------------------------------------------------------------------
+
+test instance-names-R-${SECTION}.5-2 \
+{
+    Procedures can interfere with already existing instance access
+    functions
+} \
+{
+    class A {}
+    A a
+    proc a {} {
+        return Oops
+    }
+    a 
+} "Oops"
+
+# vi: set ai ts=4 expandtab:
+

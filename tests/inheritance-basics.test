@@ -1,0 +1,100 @@
+# -----------------------------------------------------------------------------
+#
+# inheritance-basics.test --
+#     
+#     This file contains tests to validate basic inheritance
+#
+# RCS: $Id: inheritance-basics.test,v 1.1 1999/09/16 18:13:19 stefan Exp $
+#
+# Copyright (C) 1998-1999, Stefan Sinnige.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#
+# For the full GNU General Public License
+#
+# -----------------------------------------------------------------------------
+
+if {[string compare test [info commands test]] == 1} {
+    error "This test requires the 'tclpptest' shell."
+    exit 1
+}
+
+set SECTION 5.1
+
+# -----------------------------------------------------------------------------
+
+test inheritance-basics-R-${SECTION}.1-1 \
+{
+    Inheritance is specified at class definition by specifying a list of
+    base classes.
+} \
+{
+    class Base1 {
+    }
+    class Base2 : Base1 {
+    }
+    class Derived : Base2 {
+    }
+    list [classinfo heritage Base1] \
+         [classinfo heritage Base2] \
+         [classinfo heritage Derived]    
+} "{}\
+   Base1\
+   Base2"
+
+# -----------------------------------------------------------------------------
+
+test inheritance-basics-R-${SECTION}.1-2 \
+{
+    Base classes must be known before they are used.
+} \
+{
+    class Derived : Base {
+    }
+} "base class \"Base\" unknown"
+
+# -----------------------------------------------------------------------------
+
+test inheritance-basics-R-${SECTION}.1-3 \
+{
+    Object information
+} \
+{
+    class Base1 {
+    }
+    class Base2 : Base1 {
+    }
+    class Derived : Base2 {
+    }
+    Base1 b
+    Derived d
+    list [objectinfo b isA]\
+         [objectinfo b isKindOf Base1]\
+         [objectinfo b isKindOf Base2]\
+         [objectinfo d isA]\
+         [objectinfo d isKindOf Derived]\
+         [objectinfo d isKindOf Base2]\
+         [objectinfo d isKindOf Base1]\
+
+} "::Base1\
+   1\
+   0\
+   ::Derived\
+   1\
+   1\
+   1"
+
+# vi: set ai ts=4 expandtab:
+

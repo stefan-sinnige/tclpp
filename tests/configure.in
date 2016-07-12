@@ -1,0 +1,101 @@
+dnl
+dnl	configure.in --
+dnl
+dnl     This file is the input file used by GNU 'autoconf' to generate
+dnl     the file 'configure', which is run as part of the Tclpp installation
+dnl     to configure the system for the local environment
+dnl
+dnl RCSID: $Id: configure.in,v 1.1 1999/09/16 18:13:19 stefan Exp $
+dnl
+dnl	Copyright (C) 1998-1999, Stefan Sinnige.
+dnl
+dnl	This program is free software; you can redistribute it and/or modify
+dnl	it under the terms of the GNU General Public License as published by
+dnl	the Free Software Foundation; either version 2 of the License, or
+dnl	(at your option) any later version.
+dnl
+dnl	This program is distributed in the hope that it will be useful,
+dnl	but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl	GNU General Public License for more details.
+dnl
+dnl	You should have received a copy of the GNU General Public License
+dnl	along with this program; if not, write to the Free Software
+dnl	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+dnl
+dnl	For the full GNU General Public License, see the 'LICENSE' file.
+dnl
+
+AC_INIT(class-ctdt.test)
+
+dnl ######################################################################
+dnl 
+dnl  VERSION
+dnl 
+dnl ######################################################################
+
+dnl ######################################################################
+dnl
+dnl  DEFAULTS
+dnl
+dnl ######################################################################
+
+dnl ######################################################################
+dnl 
+dnl  CHECKS FOR PROGRAMS
+dnl 
+dnl ######################################################################
+
+dnl ######################################################################
+dnl 
+dnl  CHECKS FOR INSTALLATION DIRECTORY
+dnl 
+dnl ######################################################################
+
+dnl ######################################################################
+dnl 
+dnl  CHECKS FOR LIBRARIES
+dnl 
+dnl ######################################################################
+
+dnl ######################################################################
+dnl 
+dnl  HEADER FILES
+dnl 
+dnl ######################################################################
+
+dnl ######################################################################
+dnl 
+dnl  TYPEDEFS
+dnl 
+dnl ######################################################################
+
+dnl ######################################################################
+dnl 
+dnl  STRUCTURES
+dnl 
+dnl ######################################################################
+
+dnl ######################################################################
+dnl 
+dnl  COMPILER CHARACTERISTICS
+dnl 
+dnl ######################################################################
+
+dnl ######################################################################
+dnl 
+dnl  LIBRARY FUNCTIONS
+dnl 
+dnl ######################################################################
+
+dnl ######################################################################
+dnl 
+dnl  OUTPUT
+dnl 
+dnl ######################################################################
+
+AC_OUTPUT(
+    Makefile)
+
+dnl vi: set expandtab ts=4:
+

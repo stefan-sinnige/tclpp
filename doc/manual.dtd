@@ -1,0 +1,106 @@
+<!-- ==================================================
+
+     FILENAME
+     	manual.dtd
+
+     RCSID
+	$Id: manual.dtd,v 1.2 2000/05/23 20:51:34 stefan Exp $
+
+
+     AUTHOR
+	Stefan Sinnige <ssinnige@geocities.com>
+
+     COPYRIGHT, LICENSE AND DISCLAIMER
+
+	Copyright (C) 1998-2000, Stefan Sinnige.
+
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU Lesser General Public License as 
+	published by the Free Software Foundation; either version 2.1 of the 
+	License, or (at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Lesser General Public License for more details.
+
+	You should have received a copy of the GNU Lesser General Public 
+	License along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, 
+	USA.
+
+	For the full GNU Lesser General Public License, see the 'LICENSE' file.
+
+     ================================================== -->
+
+<!-- ==================================================
+	Entities
+     ================================================== -->
+
+<!entity % emph " em | it | bf | un | tt | code " >
+<!entity % xref " label | ref | cite " >
+<!entity % inline " ( #pcdata | %emph; | %xref; | footnote )* " >
+<!entity % list " itemize | enum " >
+<!entity % par " table | figure " >
+<!entity % sect " heading, p* ">
+
+<!-- ==================================================
+	Elements
+     ================================================== -->
+
+<!element file - o empty>
+<!element figure - - ((file), caption?, label?) >
+<!element caption - - (%inline)>
+<!element code - - rcdata>
+<!element item - o (( %inline | %par )*) >
+<!element itemize - - ( item* ) >
+<!element enum - - ( item* ) >
+<!element table - - ( row*, caption? ) >
+<!element column - - (( %inline | %par | %list )*) >
+<!element row - - ( column* ) >
+<!element heading o o (%inline)>
+<!element newline - o empty>
+<!element p o o (( %inline | %par | %list )+) +(newline) >
+<!element footnote - - (%inline)>
+
+<!element em - - (%inline)>
+<!element it - - (%inline)>
+<!element bf - - (%inline)>
+<!element un - - (%inline)>
+<!element tt - - (%inline)>
+
+<!element label - o empty >
+<!element ref - o empty >
+<!element cite - o empty >
+
+<!element manual - o (title, version?, author, date?, cright?, abstract?, toc?, 
+                      preface?, chapt*)>
+<!element title - o (%inline)>
+<!element version - o (%inline)>
+<!element author - o (%inline)>
+<!element cright - o (%inline)>
+<!element date - o (%inline)>
+<!element abstract - o (%inline, p*)>
+<!element preface - o (%inline, p*)>
+<!element chapt - - (%sect, sect*)>
+<!element sect - - (%sect, ssect*)>
+<!element ssect - - (%sect, sssect*)>
+<!element sssect - - (%sect)>
+<!element toc - o empty>
+
+<!-- ==================================================
+	ATTRIBUTE LISTS
+     ================================================== -->
+
+<!attlist table
+	border cdata "1"
+	width  cdata "100%">
+<!attlist file
+	src cdata #required>
+<!attlist label
+	id cdata #required>
+<!attlist ref
+	id cdata #required>
+<!attlist cite
+	id cdata #required>
+

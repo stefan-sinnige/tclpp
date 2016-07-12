@@ -1,0 +1,112 @@
+'\"
+'\" Copyright (C) 1998-2000, Stefan Sinnige.
+'\"
+'\" This program is free software; you can redistribute it and/or
+'\" modify it under the terms of the GNU Lesser General Public
+'\" License as published by the Free Software Foundation; either
+'\" version 2.1 of the License, or (at your option) any later
+'\" version.
+'\"
+'\" This program is distributed in the hope that it will be
+'\" useful, but WITHOUT ANY WARRANTY; without even the implied
+'\" warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+'\" PURPOSE. See the GNU Lesser General Public License for more
+'\" details.
+'\"
+'\" You should have received a copy of the GNU Lesser General
+'\" Public License along with this program; if not, write to the
+'\" Free Software Foundation, Inc., 59 Temple Place, Suite 330,
+'\" Boston, MA 02111-1307, USA.
+'\"
+'\" For the full GNU Lesser General Public License, see the
+'\" 'LICENSE' file.
+'\"
+.TH class n 2.0 Tclpp "Tclpp Built-In Commands"
+.BS
+.SH NAME
+class \- Define a class
+.SH SYNOPSIS
+\fBclass\fR \fIname\fR ?\fB:\fR \fIbase-classes\fR? \fIdefinition\fR
+.SH DESCRIPTION
+This command is used to define a class \fIname\fR and its
+\fIdefinition\fR of data members and functions. After a class has been
+defined it can be used to instantiate objects. Each object will allocate
+memory to hold all its variables in its own separate namespace such that
+they will not interfere with other objects. Eventhough they all share the
+same methods.
+.SH OBJECTS
+After each class definition, a function is created which name equals the
+name of the class that can be used to create instances with. The first
+argument of that function is the name of the instance, followed by any 
+arguments which are passed to the constructor of that class. An instance
+is deleted by invoking the \fBdelete\fR method on that instance.
+.sp
+
+Instances can be created dynamically as well, that is, the name of the
+instance is constructed by the system and is surely unique. That can
+be accomplished by the \fBnew\fR(n) command. 
+Symmetrically to this command is a \fBdelete\fR(n) command
+as well. 
+.SH VARIABLES
+A class may define variables to hold the data of a certain instance. Each
+variable gets allocated its own memory per instance, such that the data
+from one object does not interfere with the data of another object. A
+variable is defined by the \fBvariable\fR keyword defined in the
+\fIdefinition\fR section. The following variable types as supported:
+.TP
+\fBvariable array\fR \fIname\fR 
+Define a variable as a Tcl array.
+.TP
+\fBvariable scalar\fR \fIname\fR 
+Define a variable as a Tcl scalar variable. This is the Tcl string which 
+can be represented as a string, list, integer or
+floating point.
+.TP
+\fBvariable\fR \fIclassname name\fR 
+Define a variable as an instance of a class.
+.LP
+
+A special scalar variable, \fBthis\fR, is predefined when an instance
+is created. This variable holds the name of instance itself and is
+accessible in the class methods as such.
+.SH METHODS
+A method defined in the \fIdefinition\fR is just like a regular Tcl
+function. All argument and variable (local and global) handling as defined
+by a Tcl function apply to a class method as well. There is however one
+exception. The class variables are accessible automatically. There is 
+no need to import them explicitely.
+.sp
+
+A method can be invoked through instances only be specifying the instance
+followed by the method and any arguments. Any class variable altered in this
+function has effect on the associated instance variable only.
+.sp
+
+A special method, the constructor, is invoked automatically when an instance
+is invoked, This method bears the same name as the class. This method may
+accept arguments, but it is best to keep them defaulted in case of inheritance.
+With inheritance, the constructors of all base classes are invoked without
+any argument specified !
+.sp
+
+Similarly, another special method, the destructor, is invoked automatically
+when an instance is deleted. This method bears the same name as the class,
+prepended by the `\fB~\fR' symbol. This method does not accept any
+arguments whatsoever.
+.SH INHERITANCE
+A class can inherit methods and variables from other classes (the base or
+parent classes) by specifying these \fIbase-classes\fR before the
+class \fIdefinition\fR. To the user of the class it appears as if these
+inherited variables and methods were defined in the class itself. More
+than one base class can be inherited. If a base class is inherited multiple
+times (e.g. directly or indirectly through the base classes), that base
+class will be considered as one base class only (diamond shaped inheritance).
+.SH VIRTUAL
+Methods defined in base classes can be overridden in derived classes, only
+if they have been prefixed with the \fBvirtual\fR keyword. When such a
+method is overridden, any invocation of that method (even the ones invoked
+within the base class) will use that method.
+.SH AUTHOR(S)
+Stefan Sinnige (ssinnige@geocities.com)
+.SH SEE ALSO
+classinfo(n), delete(n), new(n)

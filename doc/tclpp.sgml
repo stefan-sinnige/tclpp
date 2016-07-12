@@ -1,0 +1,996 @@
+<!-- ======================================================================
+
+     FILENAME
+     	tclpp.sgml
+
+     RCSID
+	$Id: tclpp.sgml,v 1.4 2000/05/23 20:47:52 stefan Exp $
+
+     AUTHOR
+	Stefan Sinnige <ssinnige@geocities.com>
+
+     COPYRIGHT, LICENSE AND DISCLAIMER
+
+	Copyright (C) 1998-2000, Stefan Sinnige.
+
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU Lesser General Public License as 
+	published the Free Software Foundation; either version 2.1 of the 
+	License, or (at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Lesser General Public License for more details.
+
+	You should have received a copy of the GNU Lesser General Public 
+	License along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307,
+	USA.
+
+	For the full GNU Lesser General Public License, see the 'LICENSE' 
+	file.
+
+     ====================================================================== -->
+
+<!doctype manual system>
+
+<manual>
+
+<title>Tclpp: An Object-Oriented Extension to Tcl</title>
+
+<version>Version 2.0</version>
+
+<author>Stefan Sinnige</author>
+
+<date>Feb 8, 2000</date>
+
+<cright>1999-2000, Stefan Sinnige. See the LICENSE file in the
+distribution for the complete license and copyright agreement.</cright>
+
+<!-- ====================================================================== -->
+
+<toc>
+
+<!-- ====================================================================== -->
+
+<chapt>Introduction
+<p>
+Pure Tcl consists of procedure and variable definitions and is basically a
+procedural language: the execution of an application can easily be monitored
+by following the single execution thread. Although this concept is suitable
+for small applications, history <footnote>Like the rising of the OOP languages
+such as SmallTalk, C++ and Ada showed.</footnote> has proven that object
+oriented languages are a better choice for medium to large scale sized 
+applications. 
+<p>
+The foundation of the object oriented programming is the notion of classes
+and objects. Each class declares the layout (the data members) and the
+behaviour (the procedures) of its objects. Each object is a stand-alone
+entity, which can be manipulated by invoking its procedures. There is no
+clear thread of execution, it is basically abstracted to creation, deletion
+and alteration of objects. For example, a class can declare a car: how it 
+looks like, how to drive, etc. Each instance (object) of a car defines an 
+actual car. It defines the colour, number of doors, how to steer it, its 
+current speed etc. All can be changed and manipulated on a per object basis. 
+<p>
+Many extensions to Tcl already exist which implement object orientation, among
+which <tt>[Incr Tcl]</tt> is the best-known one. The extension presented 
+here implements the object oriented principles in a slightly different way.
+Its aim is to stay close to the C++ notation concerning inheritance, 
+constructors/destructors and class declaration. This makes the extension
+more accessible for C++ programmers than any other Tcl OOP extension.
+
+<sect>Context of Tcl
+<p>
+Although Tclpp is implementing a different principle than pure Tcl is
+using, it is still based on top of the Tcl grammar and syntax. In fact,
+as figure <ref id="fig:context"> shows, it is built directly on the Tcl
+core. All functionality of Tcl is present to the applications as well as
+the additional functionality of Tclpp.
+<figure>
+    <file src="context">
+    <caption>Tclpp in the Tcl context.</caption>
+    <label id="fig:context">
+</figure>
+The same similarity can be drawn between C and C++. Although C++ is 
+implementing the object-oriented principles, it is still based on C and
+both can be used at the same time.
+</sect>
+
+<sect>Structure of this manual
+<p>
+This manual serves two purposes in one volume. It serves as a user manual
+for those wanting to use the Tclpp as it is, and for those who wish to
+use the API provided by the C interface to the Tclpp. Furthermore, it
+will serve as a reference manual to quickly lookup the usage of certain
+features and to find the definite answer on vague and discutable issues
+that might arise when using Tclpp.
+</sect>
+
+</chapt>
+
+<!-- ====================================================================== -->
+
+<chapt>Quick Overview
+<p>
+This section presents a very high level overview of Tclpp to feel
+acquainted with the concept, features and syntax. Almost all aspects
+will be examined, but not in full detail. That will be done in later
+chapters.
+
+<sect>Procedural versus Object-Oriented
+<p>
+There are various techniques for programming, each having its own
+advantages and disadvantages, but no one is <it>better</it> than the
+other. They just serve different purposes. Languages using the procedural
+paradigm, where a program structure is based on the functions it provides
+(like C, Fortran and Tcl), were popular in the 70s and 80s and are still
+commonly in use. However, over the years, a change was noticable. The
+focus was no longer laid on the functions, but more on the data organization
+of a program. A program was seen as a collection of data on which 
+operations are performed to establish the desired effect. Data became more
+organized (data-abstraction, data-hiding) into modules and each module
+provided a certain well-defined interface to alter the data it contained.
+Witness the birth of the object-oriented programming languages.
+<p>
+Tclpp uses the object-oriented paradigm to bring more structure to your
+Tcl applications. The data can be better organized into <it>classes</it>
+and you can declare a well-defined interface to the operations that are
+allowed on your classes. Each class can be seen as a "type". Just as you
+can define operations on an integer (which do not apply to, say, a string),
+so you can do the same with classes. This data-abstraction is the basic rule 
+in object-oriented programming. You define the types by specifying the
+classes which make up your application and you create the intercommunication
+between these classes.
+<p>
+<figure>
+    <file src="classes-objects">
+    <caption>Classes and objects.</caption>
+</figure>
+It is important to understand the difference between classes and objects. A
+class merily declares a type (by defining the data it contains and the
+operations that are allowed on that data) but does not define any data
+so far. It is abstract. An object, or an instance of the class, actually
+defines the data by allocating space for the data members declared in the
+class declaration. Of course, a class can have more than one instance, each
+separated completely. This means that a class declaration does not allocate
+any space, it only says that any object instantiated from that class must
+define (allocate) which kind of data and what operations are allowed on that
+data.
+</sect>
+
+<sect>Classes and Objects
+<p>
+A class declares data and the operations that are allowed on that data. These
+two aspects are represented in Tclpp by a <tt>class</tt>. Note that the class
+does not allocate any memory for data members, that is done when an object
+of that class is instantiated.
+Take for example a class representing a circle:
+<code>
+	class Circle {
+		#
+		# Constructor and Destructor
+		#
+
+		Circle {x y r} {
+			set x_      $x
+			set y_      $y
+			set radius_ $r
+		}
+
+		~Circle {} {
+			Undraw
+		}
+
+		#
+		# Operations
+		#
+	
+		proc Draw {} {
+		}
+
+		proc Undraw {} {
+		}
+
+		#
+		# Data Members
+		#
+
+		variable scalar x_
+		variable scalar y_
+		variable scalar radius_
+	}
+</code>
+It defines four operations and three data members. The data members are
+declared by the <tt>variable</tt> keyword, followed by the type and the
+name of the variable. There are two predefined types, the <tt>scalar</tt>,
+representing a Tcl string, list or number and an <tt>array</tt>, representing
+a Tcl array. Furthermore, the type can be any class name you define. The
+variable names all end with an underscore to distinguish them clearly from
+any other variable in the class operations, but that is not required.
+<p>
+The four procedures defined in the class are actually two special procedures
+and two normal class procedures. A class may define two special procedures, a
+constructor and a destructor. The constructor is called whenever an object
+is instantiated from the class, and the destructor is called whenever an
+object is deleted. They both should have the same name as the name of the 
+class, except for the destructor which is prepended with a <tt>~</tt> symbol.
+<p>
+Note that all the data members of a class are automatically available in all
+the class operations. This concept is basically different from Tcl (and many
+other object oriented extensions) where the variables are explicitely imported
+in the class procedures when needed.
+<p>
+Now that a class has been declared, objects can be instantiated from it. An
+object only contains allocated class data members on which the class 
+operations can perform their actions to. To create a circle object from
+our example class at position (10,20) with a radius of 5:
+<code>
+	Circle circle1 10 20 5
+</code>
+This will define an object, named <tt>circle1</tt> with the specified
+properties. The constructor will be invoked automatically. All that is
+allowed on this object is to draw it, by calling the <tt>draw</tt> function:
+<code>
+	circle1 draw
+</code>
+Similar, a second, a third or a billionth circle can be created in the same
+way. Objects can be deleted as well, which will result in deallocation of
+the memory space and releasing the object name:
+<code>
+	circle1 delete
+</code>
+or by using:
+<code>
+	delete circle1
+</code>
+After an object has been deleted, it cannot be accessed anymore. During the
+deletion of the object, the destructor (if defined) will be invoked 
+automatically, which in our example will un-draw the circle. 
+</sect>
+
+<sect>Classes as types
+<p>
+Tclpp supports two build-in variable types, the <tt>scalar</tt> and the
+<tt>array</tt>. The scalar type is just your basic Tcl string (which can
+represent a list as well of course) and the array is the Tcl array type. 
+However, since classes actually define a type as well, classes can contain
+objects of other classes as data members as well. For example, if we have
+a class which consists of two <tt>Circle</tt> classes:
+<code>
+	class TwoCircle {
+		# 
+		# Operations
+		#
+
+		proc draw {} {
+			circle1_ draw
+			circle2_ draw
+		}
+
+		variable Circle circle1_
+		variable Circle circle2_
+	}
+</code>
+These variables are available in any class operation procedure, just like
+the build-in types. 
+</sect>
+
+<sect>Implicit object naming
+<p>
+The object allocated in the previous section is said to be <it>explicitly</it>
+named: the user provided the name for the object. In many cases, the user is
+not interested in the exact object name (certainly if the user has to manage
+a billion circles). In those cases, Tclpp can implicitly pass a name to the 
+user upon creation:
+<code>
+	set object [new Circle 10 20 5]
+</code>
+This object can be referenced just like an explicitly named object, but with
+the extra indirection to its actual name:
+<code>
+	$object draw
+</code>
+Be aware that if the object cannot be referenced anymore, there is no way
+to access the object and no way to delete it, resulting in a <it>memory
+leak</it>. In the following example, the first object cannot be referenced
+anymore after the second object is created:
+<code>
+	set object [new Circle 10 20 5]
+	$object draw
+	set object [new Circle 20 30 8]		;# Memory leak: First object 
+						;# cannot be referenced 
+						;# anymore !
+</code>
+Memory leaks are generally hard to detect and should be avoided at any
+time.
+</sect>
+
+<sect>Inheritance
+<p>
+Now that there is a class for a circle, we can define classes for other
+shapes as well, like squares, rectangles and bezier curves. But, they all 
+share a commonality: they are all shapes. Inheritance allows the user to
+define such a <tt>Shape</tt> <it>base</it> class and let every specific shape 
+<it>derive</it> from it. A drawing application is probably only interested
+in the <tt>Shape</tt>s and not in the actual specific shape. It will probably
+only want to do common actions on the shapes, like moving and rotating. These
+common actions do not have to be defined for all the specific classes, but
+can be abstracted to the <tt>Shape</tt> class:
+<code>
+	class Shape {
+		proc move {deltax deltay} {
+		}
+
+		proc rotate {x y degrees} {
+		}
+	}
+
+	class DrawingEditor {
+		variable scalar shapes 	;# List of shape object names
+	}
+</code>
+The <tt>DrawingEditor</tt> class maintains a list of <tt>Shape</tt> objects
+and can only invoke the operations defined by the <tt>Shape</tt> class.
+<p>
+The derived classes inherit all the data members and procedures of all their
+base classes, just as if they defined it themselves. This means that the
+<tt>Circle</tt> class can invoke the <tt>move</tt> and <tt>rotate</tt>
+functions as well: 
+<code>
+	class Circle : Shape {
+	}
+</code>
+Now that we defined a <tt>Circle</tt> and <tt>Rectangle</tt> to be of type 
+<tt>Shape</tt> as well, the <tt>DrawingEditor</tt> can list objects of these
+types <tt>Circle</tt> to its list of shapes as well.
+</sect>
+
+<sect>Virtual Functions
+<p>
+Some inherited functions defined by the base classes do not exactly what
+is required. In those cases, the user wish to define a common procedure
+in the base class, but <it>override</it> it in certain derived classes
+when necessary. For example, drawing a rectangle involves other operations
+than drawing a circle, but a shape is known to be drawable. In those
+cases, the base class defines the function as <it>virtual</it>, meaning
+that a derived class may override its functionality:
+<code>
+	class Shape {
+		virtual proc draw {} {
+		}
+	}
+
+	class Circle : Shape {
+		proc draw {} {
+			# Drawing a circle
+		}
+	}
+
+	class Rectangle : Shape {
+		proc draw {} {
+			# Drawing a rectangle
+		}
+	}
+</code>
+The drawing editor can now call any draw function on any
+<tt>Shape</tt> without knowing which shape it actually draws! If the shape
+object is in fact a circle, it will draw a circle; if it is a rectangle, it
+will draw a retangle.
+</sect>
+
+</chapt>
+
+<!-- ====================================================================== -->
+
+<chapt>Classes
+<p>
+This chapter describes the main facility provided by Tclpp, the notion of
+classes and objects. All aspects will be covered, from class creation and
+variable declaration to object usage and calling mechanisms. The following
+chapter will extend this with inheritance features.
+
+<sect>Introduction
+<p>
+Object oriented programming as presented by Tclpp introduces the notion
+of classes and objects. A class encapsulates data and associated procedures
+into one block. A class on itself is an abstraction and cannot be used as
+such. Only class instantiations, or objects, contain the actual data on
+which the class procedures may operate on. They are the implementation of
+the class by allocating memory to hold the class data. Each object is
+independent of any other object and its data can only be changed or
+accessed through that object. 
+<p>
+Each class defines a new <it>type</it>, just like the build-in types of Tcl
+(a string and an array). However, it is more clear what data they contain
+and what operations are permitted than is the case with the build-in types.
+All these types can be used within other classes as well as a data member
+for other class definitions.
+<p>
+A class is defined by the <tt>class</tt> keyword, the name of the class and
+its definition of procedures and data.
+The minimal class definition only defines a type without any data or procedure:
+<code>
+	class Minimal {}
+</code>
+but is not very useful.
+<p>
+When a class is defined, it can be used to create objects from it. Each object
+has its own name and each object works independently from other objects, 
+beacuse each maintain their own set of data. An object is instantiation by
+specifying the class and the name of the object:
+<code>
+	class Example {
+		....
+	}
+
+	Example ex1
+	Example ex2
+</code>
+The code fragment above defines two objects, <tt>ex1</tt> and <tt>ex2</tt>
+each maintaining their own set of data.
+</sect>
+
+<sect>Variable Declaration
+<p>
+A class may <it>declare</it> variables, that is, it assigns a name to a 
+type but does not actually <it>define</it> them, ie. allocate memory for it.
+That will only be done when a class is instantiated. Two types are
+predefined to the Tcl types: <tt>scalar</tt> and <tt>array</tt> and cannot
+be used for any other purpose. The following class defines four variables,
+two build-in types and two class types:
+<code>
+	class Example {
+		variable scalar name		;# build-in type
+		variable array  properties	;# build-in type
+		variable Date   date
+		variable Time	time
+	}
+</code>
+These variables are only accessible through the class defined procedures. 
+<p>
+A special scalar variable, named <tt>this</tt>, is always present and gets 
+allocated and initialized during object instantiation. It refers to the actual
+name of the object and is accessible only at the class procedures, just like
+any other type. This type cannot be redeclared in the class definition:
+<code>
+	class Example {
+		variable scalar this		;# Error
+	}
+</code>
+</sect>
+
+<sect>Procedure Definition
+<p>
+A class procedure is just your basic Tcl procedure with only one exception. All
+data members defined in the class are imported automatically to each procedure
+and need not be re-imported as is the case with all other (global) variables:
+<code>
+	class Example {
+		proc setProperty {key value} {
+			set property_($key) $value
+		}
+
+		proc display {} {
+			puts "Object '$this' has the following properties:"
+			foreach key [array names property_] {
+				puts "$key -> $property_($key)"
+			}
+		}
+
+		variable array property_
+	}
+</code>
+Each class procedure can be invoked <it>per object</it> and only affects the
+data of that object. Tclpp takes care of the mapping of the class
+defined variables and their actual representation in the objects. The syntax
+is like any other Tcl procedure call, only it is prepended with the name
+of the object:
+<code>
+	ex1 setProperty shoesize 42
+	ex1 display
+</code>
+This will set a property on the <tt>ex1</tt> object and displays the result. 
+It will the data of <tt>ex2</tt> unaffected of course.
+<p>
+Invoking a class procedure from another class procedure do not require any
+object identification. However, Tclpp 1.x required the <tt>this</tt> variable
+to be prepended to such calls. From Tclpp 2.0 onwards this is not required
+anymore, but is still correct (from backwards compatibility point of view):
+<code>
+	class Example {
+		proc function-1 {} {
+		}
+
+		proc function-2 {} {
+			function-1		;# Ok (Tclpp 2.0 onwards)
+		}
+
+		proc function-3 {} {
+			$this function-1	;# Still Ok
+		}
+	}
+</code>
+Tclpp maintains a calling context to keep track of the objects when class
+procedures are invoked. At all times it knows which object belongs to
+such a procedure call, without specifying the object through the <tt>this</tt>
+variable.
+</sect>
+
+<sect>Construction and Destruction
+<p>
+Classes can only be defined once and stay defined until the end of the 
+application. A class can never be redefined or altered at any time.
+<p>
+Objects are created and deleted all the time. They represent the volatile
+parts of the object-oriented programming principle. Data can easily be
+created and deleted at any time. Objects can be created in two ways. The
+first is when the user specifies the name of the object, while the second
+approach will create an object whose name is chosen by the system:
+<code>
+	Example ex1			;# User provides name
+	set ex2 [new Example]		;# System provides name
+</code>
+In the latter approach, the name gets assigned to a variable. Be aware not
+to re-assign that variable before deleting the object it refers to,
+otherwise you will introduce a <it>memory leak</it>: the object can not
+be referenced anymore, but still holds the allocated memory.
+<p>
+An object can be removed by calling the predefined <tt>delete</tt> function
+on the object. For example, to delete the two objects created above:
+<code>
+	ex1 delete
+	$ex2 delete
+</code>
+which is equivalent to
+<code>
+	delete ex1
+	delete $ex2
+</code>
+Note that when an object is created by the latter approach, an extra 
+indirection is required in order to get to the name of the object itself.
+
+<ssect>Constructors
+<p>
+Whenever an object is constructed, a special function can be invoked to
+initialize the object. This function, the <it>constructor</it>, must be
+supplied by the user and has the same name as the name of the class. It
+may contain any Tcl arguments which can be passed at creation time:
+<code>
+	class Example {
+		proc Example {aName} {
+			set name $aName
+		}
+		variable scalar name
+	}
+	Example ex1 "An Example"
+</code>
+This code fragment shows the constructor which gets initialed at construction
+time with the name <tt>An Example</tt>.
+<p>
+Not only the objects you define explicitely will invoke any constructor, also
+the instantated class variables will call their constructor. However, since 
+you cannot specify parameters to these type of constructors, they will try
+to invoke the constructor without pasing any arguments. Be aware that an error
+is generated when the constructor does not accept no parameters in these
+cases:
+<code>
+	class Date {
+		proc Date {day month year} {
+		}
+	}
+
+	class Schedule {
+		variable Date date	;# Error, will invoke the
+					;# constructor of Date without
+					;# any parameters upon creation
+	}
+</code>
+In such cases, supply default values for every parameter or use the 
+<tt>args</tt> construct. The constructor of all the class variables will
+be invoked before the constructor of the containing class.
+</ssect>
+
+<ssect>Destructors
+<p>
+As a constructor is used for initialization during the construction of an
+object, so is the <it>destructor</it> invoked when an object is deleted. The
+destructor has the same name of the class but is prepended with the <tt>~</tt>
+(the tilde-symbol) and does not accept any parameters. Furthermore, the
+destructor is called for every class variable as well, just like the 
+constructor did the opposite:
+<code>
+	class Appointment {
+		proc ~Appointment {} {
+			puts "Appointment deleted"
+		}
+	}
+	class Schedule {
+		variable Appointment appointment
+	}
+	Schedule s1
+	s1 delete	;# Calls destructor of the class variable
+			;# Schedule::appointment as well		
+</code>
+The destructor of all the class variables will be invoked before the
+destructor of the containing class.
+</ssect>
+</sect>
+</chapt>
+
+<!-- ====================================================================== -->
+
+<chapt>Inheritance
+<p>
+Inheritance is a very flexible and powerful way to extend classes by building 
+up a hierarchy of classes. A class inherits all the variables and procedures
+of all its parent classes automatically. This enables the user to construct
+a class having the commonality of the derived classes.
+
+<sect>Introduction
+<p>
+There are many views on inheritance: some use the approach of encapsulating
+common code into a class, others share the perspective of creating a
+specialization of a parent class. But it all boils down to the same thing:
+a parent class (Tclpp uses the C++ semantics and calls it a <it>base</it>
+class) implements variables and procedures which define common code to all
+the child classes (from now on known as <it>derived</it> classes). 
+<p>
+For example, take the class representing a person. A person has a name,
+date of birth, an address etcetera. Such a (base) class may look like:
+<code>
+	class Person {
+		proc setName    {name}    { .... }
+		proc getName    {}        { .... }
+		proc setAddress {address} { .... }
+		proc getAddress {}        { .... }
+		
+		variable scalar name
+		variable scalar address
+	}
+</code>
+A specialization of this base class can be an employee. It inherits everthing
+of the <tt>Person</tt> class, because an employee <it>is-a</it> person. But
+it has some extra features, specifically defined for an employee:
+<code>
+	class Employee : Person {
+		proc setFunction {function} { .... }
+		proc getFunction {}         { .... }
+		proc setSalary   {amount}   { .... }
+		proc getSalary   {}         { .... }
+
+		variable scalar function
+		variable scalar salary
+	}
+</code>
+The employee inherits everything from the base class <tt>Person</tt>. Its
+notation is right after the name of the class, followed by a colon and a
+list of one or more base classes. The derived class inherits all the class
+variables and the procedures of its base classes, just like it has defined
+them itself. This means, that the user may invoke the class operations of
+<tt>Person</tt> on an <tt>Employee</tt> object as well.
+
+<ssect>Construction and Destruction
+<p>
+Constructing and destructing an object in an inheritance environment is 
+somewhat more complex than a simple object. Basically, during construction
+all the variables and procedures of all the base classes exist in the
+derived class as well as shown in figure <ref id="fig:inheritance">
+<figure>
+    <file src="inheritance">
+    <caption>Inheritance class layout.</caption>
+    <label id="fig:inheritance">
+</figure>
+The green class represents the base class. It is extended by the derived
+blue class with some extra data and operations. The blue class on itself
+serves as a base class for the pink class, which extends it even further with
+data and operations.
+<p>
+This hierachy of classes is typical for inheritance, just like the lineage
+of any person. But it may also be the source of many misunderstanding and
+erroreneous classes if not designed correctly.
+<p>
+When a derived class is constructed, it will first construct all the base
+classes before it will construct the derived class.
+This includes the allocation of the class variables and the calling mechanism
+of the constructors. 
+Destructing an object is performed in the reverse order. First the derived
+class is deleted before the base classes.
+</ssect>
+</sect>
+
+<sect>Virtual Functions
+<p>
+When designing base and derived classes, it becomes convenient to define
+a set of procedures in the base class which can be overwritten by the
+derived classes. This extends the notion of <it>specialization</it> even
+further. For example, a shape can have many forms, but how a shape 
+actually looks like depends on the type of the shape. A rectangle is
+drawn differently than a circle. This means that although a shape has a
+function to draw it, the actual drawing procedure is accomplished by
+the specialized (derived) shapes. Defining a function a <tt>virtual</tt>
+in the base class enables the derived class to override it:
+<code>
+	class Shape {
+		virtual proc Draw {} {
+			error "Cannot draw a shapeless form"
+		}
+	}
+
+	class Rectangle : Draw {
+		proc Draw {} {
+			# Procedure to draw a rectangle
+		}
+	}
+
+	class Circle : Draw {
+		proc Draw {} {
+			# Procedure to draw a cirle
+		}
+	}
+
+	class Manager {
+		proc Draw {} {
+			foreach shape $shapes {
+				$shape Draw
+			}
+		}
+		variable scalar shapes
+	}
+</code>
+The <tt>Manager</tt> class maintains a list of <tt>Shape</tt>s. It is not
+interested in the exact nature of the shape, as long as it is a drawable
+shape. When the <tt>Manager</tt> invokes the function <tt>Draw</tt>, it
+will invoke the most-derived <tt>Draw</tt> function. If the shape was a
+<tt>Rectangle</tt>, it will invoke the <tt>Rectangle</tt>s function, if
+it was a <tt>Circle</tt>, it will invoke the <tt>Circle</tt>s function.
+<p>
+A virtual function can be overriden by a whole chain of derived classes,
+as long as each of them defines it as virtual as well. In our example, the
+<tt>Rectangle</tt> and <tt>Circle</tt> did not define the function as
+virtual, such that derived classes from the <tt>Rectangle</tt> and 
+<tt>Circle</tt> are not allowed to override this function any further.
+</sect>
+
+<sect>Multiple Inheritance
+<p>
+A class may have more than one base class at the same time by specifying
+more than one base class after the colon in the base class list. In contrast
+to single inheritance, this is called multiple inheritance. Although it is
+practically not much different from single inheritance, it is more tricky
+for the underlying machinery to deal with multiple inheritance. The classic
+example of difficulty with multiple inheritance is inheritance from the
+same base class:
+<code>
+	class Animal {
+	}
+
+	class Male : Animal {
+	}
+
+	class Female : Animal {
+	}
+
+	class Hermaphrodite : Male Female {
+	}
+</code>
+The <tt>Hermaphrodite</tt> is both a male and female animal, but this implies
+that it is two <tt>Animals</tt>. In some designs this is preferred, but in
+other designs it is not, then it would have been preferred to have two 
+different instances for each base class. To solve this issue, Tclpp always 
+assumes that both are the same base classes and takes the 
+<it>diamond-shaped</it> approach (See figure <ref id="fig:diamond">), which is 
+not what is desired in all situations but it eliminates many ambiquities.
+<figure>
+    <file src="diamond">
+    <caption>Diamond Shaped Inheritance.</caption>
+    <label id="fig:diamond">
+</figure>
+This means that Tclpp always has so-called virtual base classes. In contrast to
+C++ where base classes can be virtual and non virtual to represent both the 
+diamond shaped figure and the layout with multiple base classes of the same 
+type.
+</sect>
+</chapt>
+
+<!-- ====================================================================== -->
+
+<chapt>Information
+<p>
+This chapter describes the methods provided by Tclpp to query all kinds of
+information from classes and objects. 
+
+<sect>Version Information
+<p>
+Information about the version of Tclpp can be obtained via two globally
+defined variables:
+<itemize>
+    <item><tt>tclpp_version</tt> returns the major and minor version number.
+	  For example <bf>2.0</bf> represents major release 2 and minor
+	  release 0.
+    <item><tt>tclpp_patchLevel</tt> returns the complete version number,
+          including the patch level. For example <bf>2.0b2</bf> represents
+	  the second beta release of version 2.0.
+</itemize>
+</sect>
+
+<sect>Class Information
+<p>
+The user can query information about classes at any time after it has been
+defined. These include the class names, the heritage, the methods and
+the variables. All information can be queried by one command: 
+<tt>classinfo</tt>. 
+
+<ssect>Defined classes
+<p>
+Information about defined class names can be retrieved by the
+<code>
+	classinfo classes ?pattern?
+</code>
+command. If the <tt>pattern</tt> is not defined, it simply returns a list
+of all fully qualified class names, currently defined. the <tt>pattern</tt>
+can be used to restrict this output.
+</ssect>
+
+<ssect>Class heritage
+<p>
+Information about the heritage of a certain class can be retrieved by the
+<code>
+	classinfo heritage class
+</code>
+command. It will return the first line heritage of a class, <it>not</it> the
+entire tree. For example:
+<code>
+	class Base1 {}
+	class Base2 : Base1 {}
+	class Derived : Base2 {}
+</code>
+The heritage returned for the <tt>Derived</tt> class will only be the class
+<tt>Base2</tt>, not <tt>Base1</tt> eventhough it is indirectly derived from
+that class as well.
+</ssect>
+
+<ssect>Class Variables
+<p>
+Information about the variables defined of a class can be retrieved by the
+<code>
+	classinfo variables class
+</code>
+command. It will return a list of variable information, each containing the
+variable name and type. Note, that the <tt>this</tt> variable is listed as
+well! For example:
+<code>
+	class Base {
+	        variable scalar base_member
+        }
+	class Derived : Base {
+		variable scalar derived_member
+	}
+</code>
+The variable information of these two classes return the following lists:
+<code>
+	% classinfo variables Base
+	{{this scalar} {base_member scalar}}
+	% classinfo variables Derived
+	{{this scalar} {derived_member scalar}}
+</code>
+In case of inheritance, it will <it>not</it> list the variables of all the
+base classes.
+</ssect>
+
+<ssect>Class Methods
+<p>
+Information about the methods defined of a class can be retrieved by the
+<code>
+	classinfo methods class
+</code>
+command. It will return a list of all the methods defined in the class. In
+case of inheritance it will <it>not</it> list the commands of the base
+classes.
+</ssect>
+</sect>
+
+<sect>Run-Time Type Information
+<p>
+Apart from the global information about classes, one can also query information
+about a certain object. This is better known as <it>RTTI</it> (Run-Time Type
+Information) and is available through the <tt>objectinfo</tt> procedure.
+
+<ssect>Class of an Object
+<p>
+Information about the type of an object (that is, its class name) can be 
+retrieved by the
+<code>
+	objectinfo object isA 
+</code>
+command. It will return the fully qualified class name of the specified
+object. For example:
+<code>
+	class Base { .... }
+	class Derived : Base { .... }
+	Derived d
+
+	objectinfo d isA	;# Returns '::Derived'
+</code>
+</ssect>
+
+<ssect>Object is a class
+<p>
+Information whether an object's type equals (or one of its base classes equals)
+to a certain class can be retrieved by the
+<code>
+	objectinfo object isKindOf class 
+</code>
+command. It will return <tt>true</tt> if the object's type matches its class 
+name or that of one of its base classes. For example
+<code>
+	class Base { .... }
+	class Derived : Base { .... }
+	Base b
+	Derived d
+
+	objectinfo b isKindOf Base	;# Returns true
+	objectinfo b isKindOf Derived	;# Returns false
+	objectinfo d isKindOf Derived	;# Returns true
+	objectinfo d isKindOf Base	;# Returns true
+</code>
+</ssect>
+</sect>
+
+</chapt>
+
+<!-- ====================================================================== -->
+
+<chapt>Scoping
+<p>
+This chapter describes the rules for scoping and its behaviour in certain
+situations.
+
+<sect>Basic Scoping
+<p>
+Each class defines its own namespace, equal to the name of the class. Within
+this namespace, the member functions are defined as specified by the class
+definition.
+<p>
+Each instance of a class defines its own namespace as well, equal to the
+name of the instance. Within this namespace, the datamembers are defined
+as specified by that class (and its base classes).
+</sect>
+
+<sect>Using Namespaces
+<p>
+Classes and their instances are created within the namespace they are defined
+in. If no namespace is given, the global namespace (specified by '<tt>::</tt>')
+is used. 
+<p>
+When a namespace is deleted, all its containing instances will be deleted
+properly. That is, it will destroy them and invoke the destructors.
+<p>
+Classes defined <it>in</it> the namespace are destroyed when the namespace
+is deleted. This will result in unpredictable behaviour if instances are
+still alive of these classes (either allocated directly, as a base class  or 
+as a data member of another class). The "rule of thumb" in this case is not
+to define classes in namespaces which might not have a life-time of the
+duration of the application.
+</sect>
+</chapt>
+
+<!-- ====================================================================== -->
+
+<chapt>Reference Manual
+<p>
+Not yet initiated.
+</chapt>
+
+<!-- ====================================================================== -->
+
+<chapt>Compatibility
+<p>
+This chapter discusses the differences with respect to backwards compatibility
+with older releases. This information is valuable for migrating code based
+on the old releases to this new release.
+</chapt>
+
+</manual>
+

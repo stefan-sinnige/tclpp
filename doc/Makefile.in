@@ -1,0 +1,114 @@
+#
+# Makefile --
+#
+#	This Makefile created the Tclpp extension documentation.
+#
+# RCSID: $Id: Makefile.in,v 1.3 2000/05/23 20:46:26 stefan Exp $
+#
+# Copyright (C) 1997-2000, Stefan Sinnige.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published
+# by the Free Software Foundation; either version 2.1 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+#
+# For the full GNU Lesser General Public License, see the 'LICENSE' file.
+#
+
+# ----------------------------------------------------------------------------
+# Default top-level directories in which to install architecture-
+# specific files (exec_prefix) and machine-independent files such
+# specific files (exec_prefix) and machine-independent files such
+# as scripts (prefix).  The values specified here may be overridden
+# at configure-time with the --exec-prefix and --prefix options
+# to the "configure" script.
+# ----------------------------------------------------------------------------
+
+prefix	  = @prefix@
+exec_prefix = @exec_prefix@
+
+# ----------------------------------------------------------------------------
+# The following definition can be set to non-null for special systems
+# like AFS with replication.  It allows the pathnames used for installation
+# to be different than those used for actually reference files at
+# run-time.  INSTALL_ROOT is prepended to $prefix and $exec_prefix
+# when installing files.
+# ----------------------------------------------------------------------------
+
+INSTALL_ROOT =
+
+# ----------------------------------------------------------------------------
+# Directory in which to install documentation
+# ----------------------------------------------------------------------------
+
+INSTALL          = ../config/install-sh
+MAN_INSTALL_DIR  = $(INSTALL_ROOT)$(prefix)/man
+MAN1_INSTALL_DIR = $(MAN_INSTALL_DIR)/man1
+MAN3_INSTALL_DIR = $(MAN_INSTALL_DIR)/man3
+MANN_INSTALL_DIR = $(MAN_INSTALL_DIR)/mann
+
+# ----------------------------------------------------------------------------
+# The sgml-tools.
+# ----------------------------------------------------------------------------
+
+NSGMLS 	 = @NSGMLS@
+SGMLSASP = @SGMLSASP@
+
+# ----------------------------------------------------------------------------
+# The information below should be usable as is.
+# ----------------------------------------------------------------------------
+
+SRCS		= \
+			tclpp.sgml	
+
+# ----------------------------------------------------------------------------
+#
+# RULES 
+#
+# ----------------------------------------------------------------------------
+
+all: check tclpp.html manpages
+
+check:
+	@if test "$(NSGMLS)" = "none" -o "$(SGMLSASP)" = "none" ; then \
+		echo "SGML tools not located. Unable to create documentation."; \
+		exit 0; \
+	fi
+
+tclpp.html: tclpp.sgml manual.dtd
+	$(NSGMLS) -D. tclpp.sgml | $(SGMLSASP) translations/html/mapping > asp.out
+	./resolve.tcl translations/html/resolve-1 < asp.out > resolve-1.out
+	./resolve.tcl translations/html/resolve-2 < resolve-1.out > resolve-2.out
+	mv resolve-2.out tclpp.html
+	rm *.out
+
+manpages:
+	$(NSGMLS) -D. manpages.sgml | $(SGMLSASP) translations/man/mapping > asp.out
+	./resolve.tcl translations/man/split < asp.out
+	rm *.out
+
+install:
+	for i in *.n ; do \
+		$(INSTALL) -c $$i $(MANN_INSTALL_DIR) ; \
+	done
+
+clean:
+	rm -f core *.out *.n
+
+distclean: clean
+	rm -rf Makefile config.cache config.log config.status tclpp.html
+
+.c.o:
+	$(CC) -c $(CFLAGS) $(CC_SWITCHES) $<
+
+# vi: set ai ts=4 noexpandtab:
+

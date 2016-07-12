@@ -1,0 +1,236 @@
+# -----------------------------------------------------------------------------
+#
+# class-methods.test --
+#     
+#     This file contains tests to validate reference section 3.2
+#
+# RCS: $Id: class-methods.test,v 1.1 1999/09/16 18:13:19 stefan Exp $
+#
+# Copyright (C) 1998-1999, Stefan Sinnige.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#
+# For the full GNU General Public License
+#
+# -----------------------------------------------------------------------------
+
+if {[string compare test [info commands test]] == 1} {
+    error "This test requires the 'tclpptest' shell."
+    exit 1
+}
+
+set SECTION 3.3
+
+# -----------------------------------------------------------------------------
+
+test class-methods-${SECTION}.1-1 \
+{
+    A class method is a Tcl procedure defined in the class definition
+} \
+{
+    class A {
+        proc func {} {
+        }
+    }
+    list [info commands ::A::func] \
+	     [classinfo methods A]
+} "::A::func\
+   func"
+
+# -----------------------------------------------------------------------------
+
+test class-methods-${SECTION}.1-1 \
+{
+    A class method behaves like a Tcl procedure concerning procedure
+    definition errors
+} \
+{
+    class A {
+        proc func {
+        }
+    }
+} "wrong # args: should be \"proc name args body\""
+
+# -----------------------------------------------------------------------------
+
+test class-methods-${SECTION}.2-1 \
+{
+    A class method is associated to its surrounding class context. Name
+    clashes between class defined and global functions do not exist.
+} \
+{
+    proc func {} {
+    }
+    class A {
+        proc func {} {
+        }
+    }
+    list [info commands ::func] \
+	     [info commands ::A::func] \
+	     [classinfo method ::A]
+} "::func\
+   ::A::func\
+   func"
+
+# -----------------------------------------------------------------------------
+
+test class-methods-${SECTION}.2-2 \
+{
+    A class method is associated to its surrounding class context. Name
+    clashes between functions defined in a class and its sub-classes do
+    not exist.
+} \
+{
+    class A {
+        proc func {} {
+        }
+        class B {
+            proc func {} {
+            }
+        }
+    }
+    list [info commands ::A::func] \
+	     [info commands ::A::B::func] \
+	     [classinfo methods ::A] \
+	     [classinfo methods ::A::B]
+} "::A::func\
+   ::A::B::func\
+   func\
+   func"
+
+# -----------------------------------------------------------------------------
+
+test class-methods-3.3.3 \
+{ 
+    Class methods cannot be defined more than once in a class definition
+} \
+{
+    class A {
+        proc func {} {
+        }
+        proc func {} {
+        }
+    }
+} "class method \"::A::func\" already exists"
+
+# -----------------------------------------------------------------------------
+
+test class-methods-3.3.4-1 \
+{
+    Non-static methods are invoked from their instance
+} \
+{
+    class A {
+        proc func {arg1 arg2} {
+            return "arg1 = \"$arg1\" arg2 = \"$arg2\""
+        }
+    }
+    A a
+    a func hello world
+} "arg1 = \"hello\" arg2 = \"world\""
+
+# -----------------------------------------------------------------------------
+
+test class-methods-3.3.4-2 \
+{
+    Only class methods can be invoked
+} \
+{
+    proc unknown {} {
+        return "Unknown called"
+    }
+    class A {
+        proc func {arg1 arg2} {
+            return "arg1 = \"$arg1\" arg2 = \"$arg2\""
+        }
+    }
+    A a
+    a unknown
+} "method \"unknown\" not a member of class \"::A\""
+
+# -----------------------------------------------------------------------------
+
+test class-methods-3.3.4-2 \
+{
+    A class method and arguments need to be specified after the instance
+    name when invoking commands
+} \
+{
+    class A {
+        proc func {} {
+        }
+    }
+    A a
+    a 
+} "wrong # args: should be \"a method ?args ...?\""
+
+# -----------------------------------------------------------------------------
+
+test class-methods-3.3.5-1 \
+{
+    Normal Tcl procedure arguments apply to class methods: args
+} \
+{
+    class A {
+        proc func {arg0 args} {
+            return "# args = [llength $args], args = \"$args\""
+        }
+    }
+    A a
+    a func zero one two three
+} "# args = 3, args = \"one two three\""
+
+# -----------------------------------------------------------------------------
+
+test class-methods-3.3.5-2 \
+{
+    Normal Tcl procedure arguments apply to class methods: Default arguments
+} \
+{
+    class A {
+        proc func {arg0 {arg1 one} {arg2 two}} {
+            return "arg0 = \"$arg0\" arg1 = \"$arg1\" arg2 = \"$arg2\""
+        }
+    }
+    A a
+    a func zero one
+} "arg0 = \"zero\" arg1 = \"one\" arg2 = \"two\""
+
+# -----------------------------------------------------------------------------
+
+test class-methods-3.3.7-1 \
+{
+    A global variable has precedence above a data member with the same
+    name
+} \
+{
+    class A {
+        variable scalar a
+	proc member_set {value} {
+	    set a $value
+        }
+	proc global_set {value} {
+	    global a
+	    set a $value
+        }
+    }
+    A a1
+    a1 member_set 10
+    a1 global_set 20
+    list $a $a1::A::a
+} "20 10"
+
+# vi: set ai ts=4 expandtab:
+

@@ -1,0 +1,222 @@
+#
+# Makefile --
+#
+#    This Makefile created the Tclpp extension library.
+#
+# RCSID: $Id: Makefile.in,v 1.6 2000/06/29 21:14:26 stefan Exp $
+#
+# Copyright (C) 1998-2000, Stefan Sinnige.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published 
+# by the Free Software Foundation; either version 2.1 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+#
+# For the full GNU Lesser General Public License, see the 'LICENSE' file.
+#
+
+# ----------------------------------------------------------------------------
+# The version of the Tclpp package, used in various names.
+# ----------------------------------------------------------------------------
+
+MAJOR_VERSION = @TCLPP_MAJOR_VERSION@
+MINOR_VERSION = @TCLPP_MINOR_VERSION@
+PATCH_LEVEL   = @TCLPP_PATCH_LEVEL@
+VERSION       = @TCLPP_VERSION@
+
+# ----------------------------------------------------------------------------
+# Default top-level directories in which to install architecture-
+# specific files (exec_prefix) and machine-independent files such
+# specific files (exec_prefix) and machine-independent files such
+# as scripts (prefix).  The values specified here may be overridden
+# at configure-time with the --exec-prefix and --prefix options
+# to the "configure" script.
+# ----------------------------------------------------------------------------
+
+prefix      = @prefix@
+exec_prefix = @exec_prefix@
+
+# ----------------------------------------------------------------------------
+# The following definition can be set to non-null for special systems
+# like AFS with replication.  It allows the pathnames used for installation
+# to be different than those used for actually reference files at
+# run-time.  INSTALL_ROOT is prepended to $prefix and $exec_prefix
+# when installing files.
+# ----------------------------------------------------------------------------
+
+INSTALL_ROOT =
+
+# ----------------------------------------------------------------------------
+# Directory in which to install the binaries and libraries
+# ----------------------------------------------------------------------------
+
+INSTALL         = ../config/install-sh
+BIN_INSTALL_DIR = $(INSTALL_ROOT)$(exec_prefix)/bin
+LIB_INSTALL_DIR = $(INSTALL_ROOT)$(exec_prefix)/lib
+
+# ----------------------------------------------------------------------------
+# Default top-level directories and sub directories. The ROOT points
+# to the top level source directory.
+# ----------------------------------------------------------------------------
+
+ROOT        = ..
+GENERICDIR  = $(ROOT)/generic
+TESTSDIR    = $(ROOT)/tests
+UNIXDIR     = $(ROOT)/unix
+DOCDIR      = $(ROOT)/doc
+
+# ----------------------------------------------------------------------------
+# Directory from which applications will reference the library of Tcl
+# scripts (note: you can set the TCLPP_LIBRARY environment variable at
+# run-time to override this value):
+# ----------------------------------------------------------------------------
+
+TCLPP_LIBRARY = $(prefix)/lib/tclpp$(VERSION)
+
+# ----------------------------------------------------------------------------
+# To change the compiler switches, for example to change from optimization to
+# debugging symbols, change the following line:
+# ----------------------------------------------------------------------------
+
+CFLAGS_DEBUG   = @TCLPP_CFLAGS_DEBUG@
+CFLAGS_WARNING = @TCLPP_CFLAGS_WARNING@
+CFLAGS         = $(CFLAGS_DEBUG) $(CFLAGS_WARNING) @TCL_DEFS@ @DEFS@
+
+# ----------------------------------------------------------------------------
+# The following sepcifies the location of the top-level source directory
+# from which Tcl was built. This was extracted from the tclConfig.sh
+# ----------------------------------------------------------------------------
+
+TCL_SRC_DIR    = @TCL_SRC_DIR@
+
+# ----------------------------------------------------------------------------
+# The following symbols provide support for dynamic loading and shared
+# libraries. If the configure script could not figure it out, you can
+# try changing the following definitions.
+# ----------------------------------------------------------------------------
+
+SHLIB_CFLAGS = @TCL_SHLIB_CFLAGS@
+SHLIB_LD     = @TCL_SHLIB_LD@
+
+# ----------------------------------------------------------------------------
+# The library to create, both for static as for shared libraries as specified
+# by the configure script. If the configure script could not figure out the
+# shared library creation flags, you might want to change this library name
+# as well.
+# ----------------------------------------------------------------------------
+
+TCLPP_LIB_FILE = @TCLPP_LIB_FILE@
+
+# ----------------------------------------------------------------------------
+# Tcl libraries built with optimization switches have this additional extension
+# ----------------------------------------------------------------------------
+
+DBGX = @TCL_DBGX@
+
+# ----------------------------------------------------------------------------
+# Additional libraries to use when linking.  The "TCL_LIBS" part will be
+# replaced (or has already been replaced) with relevant libraries as
+# determined by the configure script.
+# ----------------------------------------------------------------------------
+
+TCL_LIBS = @TCL_LIB_SPEC@ @TCL_LIBS@ @TCL_DL_LIBS@ 
+TK_LIBS  = @TK_LIB_SPEC@ @TK_LIBS@ @TK_DL_LIBS@
+
+# ----------------------------------------------------------------------------
+# The information below should be usable as is.  The configure script won't
+# modify it and you shouldn't need to modify it either.
+# ----------------------------------------------------------------------------
+
+CC          = @CC@
+CC_SWITCHES = $(CFLAGS) $(SHLIB_CFLAGS) -I. -I$(GENERICDIR) \
+              -I$(TCL_SRC_DIR)/generic
+RANLIB      = @RANLIB@
+
+SRCS        = \
+	      $(GENERICDIR)/tclppInit.c		\
+	      $(GENERICDIR)/tclppClass.c	\
+	      $(GENERICDIR)/tclppInfo.c		\
+	      $(GENERICDIR)/tclppMethod.c	\
+	      $(GENERICDIR)/tclppInstance.c	\
+	      $(GENERICDIR)/tclppVariable.c
+
+OBJS	    = \
+	      tclppInit.o	\
+	      tclppClass.o	\
+	      tclppInfo.o	\
+	      tclppMethod.o	\
+	      tclppInstance.o	\
+	      tclppVariable.o
+
+# ----------------------------------------------------------------------------
+#
+# RULES 
+#
+# ----------------------------------------------------------------------------
+
+all: $(TCLPP_LIB_FILE) tclppsh wishpp
+
+$(TCLPP_LIB_FILE): $(OBJS)
+	rm -rf $(TCLPP_LIB_FILE)
+	@TCLPP_MAKE_LIB@
+	$(RANLIB) $(TCLPP_LIB_FILE)
+
+tclppsh: $(TCLPP_LIB_FILE)
+	$(CC) -c $(CFLAGS) $(CC_SWITCHES) tclAppInit.c
+	$(CC) @TCL_LD_FLAGS@ tclAppInit.o @TCLPP_BUILD_LIB_SPEC@ \
+		$(TCL_LIBS) $(LD_SEARCH_FLAGS) -o tclppsh
+
+wishpp: $(TCLPP_LIB_FILE)
+	$(CC) -c $(CFLAGS) $(CC_SWITCHES) -DWITH_TK tclAppInit.c
+	$(CC) @TK_LD_FLAGS@ tclAppInit.o @TCLPP_BUILD_LIB_SPEC@ \
+		$(TK_LIBS) $(TCL_LIBS) $(LD_SEARCH_FLAGS) -o wishpp
+
+tclpptest: tclppTest.o $(TCLPP_LIB_FILE)
+	$(CC) @TCL_LD_FLAGS@ tclppTest.o @TCLPP_BUILD_LIB_SPEC@ \
+		$(TCL_LIBS) $(LD_SEARCH_FLAGS) -o tclpptest
+
+test: tclpptest
+	LD_LIBRARY_PATH=`pwd`:${LD_LIBRARY_PATH}; export LD_LIBRARY_PATH; \
+	SHLIB_PATH=`pwd`:${SHLIB_PATH}; export SHLIB_PATH; \
+	( echo cd ../tests\; source all) | ./tclpptest
+
+install: $(TCLPP_LIB_FILE) tclppsh
+	$(INSTALL) $(TCLPP_LIB_FILE) $(LIB_INSTALL_DIR)
+	$(INSTALL) tclppConfig.sh $(LIB_INSTALL_DIR)
+	$(INSTALL) tclppsh $(BIN_INSTALL_DIR)
+	
+clean:
+	rm -f *.a *.o libtclpp* core tclppsh tclpptest
+
+distclean: clean
+	rm -rf Makefile config.cache config.lo config.status
+
+tclppClass.o: $(GENERICDIR)/tclppClass.c
+	$(CC) -c $(CFLAGS) $(CC_SWITCHES) $<
+
+tclppInfo.o: $(GENERICDIR)/tclppInfo.c
+	$(CC) -c $(CFLAGS) $(CC_SWITCHES) $<
+
+tclppInit.o: $(GENERICDIR)/tclppInit.c
+	$(CC) -c $(CFLAGS) $(CC_SWITCHES) $<
+
+tclppInstance.o: $(GENERICDIR)/tclppInstance.c
+	$(CC) -c $(CFLAGS) $(CC_SWITCHES) $<
+
+tclppMethod.o: $(GENERICDIR)/tclppMethod.c
+	$(CC) -c $(CFLAGS) $(CC_SWITCHES) $<
+
+tclppVariable.o: $(GENERICDIR)/tclppVariable.c
+	$(CC) -c $(CFLAGS) $(CC_SWITCHES) $<
+
+tclppTest.o: $(UNIXDIR)/tclppTest.c
+	$(CC) -c $(CFLAGS) $(CC_SWITCHES) $<

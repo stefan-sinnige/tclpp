@@ -1,0 +1,160 @@
+# -----------------------------------------------------------------------------
+#
+# inheritance-methods.test --
+#     
+#     This file contains tests to validate inheritance concerning
+#     class methods
+#
+# RCS: $Id: inheritance-methods.test,v 1.1 1999/09/16 18:13:19 stefan Exp $
+#
+# Copyright (C) 1998-1999, Stefan Sinnige.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#
+# For the full GNU General Public License
+#
+# -----------------------------------------------------------------------------
+
+if {[string compare test [info commands test]] == 1} {
+    error "This test requires the 'tclpptest' shell."
+    exit 1
+}
+
+set SECTION 5.3
+
+# -----------------------------------------------------------------------------
+
+test inheritance-methods-R-${SECTION}.1-1 \
+{
+    Methods from base classes are directly accessible in the derived class.
+} \
+{
+    class Base {
+        proc base_func {} {
+            return "base_func"
+        }
+    }
+    class Derived : Base {
+    }
+    Derived d
+    d base_func
+} "base_func"
+
+# -----------------------------------------------------------------------------
+
+test inheritance-methods-R-${SECTION}.1-2 \
+{
+    Methods from base classes are accessible in the derived class methods.
+} \
+{
+    class Base {
+        proc base_func {} {
+            return "base_func"
+        }
+    }
+    class Derived : Base {
+        proc derived_func {} {
+            return [base_func]
+        }
+    }
+    Derived d
+    d derived_func
+} "base_func"
+
+# -----------------------------------------------------------------------------
+
+test inheritance-methods-R-${SECTION}.1-3 \
+{
+    Non-virtual methods from derived classes are not accessible in the base 
+    class methods.
+} \
+{
+    class Base {
+        proc base_func {} {
+            return [derived_func]
+        }
+    }
+    class Derived : Base {
+        proc derived_func {} {
+            return "derived_func"
+        }
+    }
+    Derived d
+    d base_func
+} "invalid command name \"derived_func\""
+
+# -----------------------------------------------------------------------------
+
+test inheritance-methods-R-${SECTION}.2-1 \
+{
+    Non-virtual base class methods cannot be overloaded by derived classes.
+} \
+{
+    class Base {
+        proc func {} {
+        }
+    }
+    class Derived : Base {
+        proc func {} {
+        }
+    }
+    Derived d
+} "method \"::Derived::func\" cannot override non-virtual \"::Base::func\""
+
+# -----------------------------------------------------------------------------
+
+test inheritance-methods-R-${SECTION}.2-2 \
+{
+    Non-virtual base class methods cannot be overloaded by other base classes.
+} \
+{
+    class Base1 {
+        proc func {} {
+        }
+    }
+    class Base2 {
+        proc func {} {
+        }
+    }
+    class Derived : Base1 Base2 {
+    }
+    Derived d
+} "method \"::Base1::func\" hides \"::Base2::func\" (Ambiguity)"
+
+# -----------------------------------------------------------------------------
+
+test inheritance-methods-R-${SECTION}.2-3 \
+{
+    Non-virtual base class methods cannot be overloaded by the derived and
+    other base classes altogether.
+} \
+{
+    class Base1 {
+        proc func {} {
+        }
+    }
+    class Base2 {
+        proc func {} {
+        }
+    }
+    class Derived : Base1 Base2 {
+        proc func {} {
+        }
+    }
+    Derived d
+} "method \"::Derived::func\" cannot override non-virtual \"::Base1::func\""
+
+# vi: set ai ts=4 expandtab:
+

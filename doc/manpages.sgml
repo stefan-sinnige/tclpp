@@ -1,0 +1,468 @@
+<!-- ======================================================================
+
+     FILENAME
+     	manpages.sgml
+
+     RCSID
+        $Id: manpages.sgml,v 1.3 2000/05/23 20:46:26 stefan Exp $
+
+     AUTHOR
+        Stefan Sinnige <ssinnige@geocities.com>
+
+     COPYRIGHT, LICENSE AND DISCLAIMER
+
+        Copyright (C) 1998-2000, Stefan Sinnige.
+
+        This program is free software; you can redistribute it and/or modify
+        it under the terms of the GNU Lesser General Public License as 
+        published by the Free Software Foundation; either version 2.1 of the 
+        License, or (at your option) any later version.
+
+        This program is distributed in the hope that it will be useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        GNU Lesser General Public License for more details.
+
+        You should have received a copy of the GNU General Public License
+        along with this program; if not, write to the Free Software
+        Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, 
+        USA.
+
+        For the full GNU Lesser General Public License, see the 'LICENSE' 
+        file.
+
+     ====================================================================== -->
+
+<!doctype man system>
+
+<man>
+
+<!-- ======================================================================
+
+     class
+
+     ====================================================================== -->
+
+<manpage basename=class.n>
+
+<title>
+class n 2.0 Tclpp "Tclpp Built-In Commands"
+</title>
+
+<name>
+class \- Define a class
+</name>
+
+<synopsis>
+<bf>class</bf> <it>name</it> ?<bf>:</bf> <it>base-classes</it>? <it>definition</it>
+</synopsis>
+
+<description>
+This command is used to define a class <it>name</it> and its
+<it>definition</it> of data members and functions. After a class has been
+defined it can be used to instantiate objects. Each object will allocate
+memory to hold all its variables in its own separate namespace such that
+they will not interfere with other objects. Eventhough they all share the
+same methods.
+</description>
+
+<sect heading=OBJECTS>
+After each class definition, a function is created which name equals the
+name of the class that can be used to create instances with. The first
+argument of that function is the name of the instance, followed by any 
+arguments which are passed to the constructor of that class. An instance
+is deleted by invoking the <bf>delete</bf> method on that instance.
+<newlines>
+Instances can be created dynamically as well, that is, the name of the
+instance is constructed by the system and is surely unique. That can
+be accomplished by the <bf>new</bf>(n) command. 
+Symmetrically to this command is a <bf>delete</bf>(n) command
+as well. 
+</sect>
+
+<sect heading=VARIABLES>
+A class may define variables to hold the data of a certain instance. Each
+variable gets allocated its own memory per instance, such that the data
+from one object does not interfere with the data of another object. A
+variable is defined by the <bf>variable</bf> keyword defined in the
+<it>definition</it> section. The following variable types as supported:
+<dl>
+
+<dh><bf>variable array</bf> <it>name</it> </dh>
+<dt>Define a variable as a Tcl array.</dt>
+
+<dh><bf>variable scalar</bf> <it>name</it> </dh>
+<dt>Define a variable as a Tcl scalar variable. This is the Tcl string which 
+can be represented as a string, list, integer or
+floating point.</dt>
+
+<dh><bf>variable</bf> <it>classname name</it> </dh>
+<dt>Define a variable as an instance of a class.</dt>
+
+</dl>
+A special scalar variable, <bf>this</bf>, is predefined when an instance
+is created. This variable holds the name of instance itself and is
+accessible in the class methods as such.
+</sect>
+
+<sect heading=METHODS>
+A method defined in the <it>definition</it> is just like a regular Tcl
+function. All argument and variable (local and global) handling as defined
+by a Tcl function apply to a class method as well. There is however one
+exception. The class variables are accessible automatically. There is 
+no need to import them explicitely.
+<newlines>
+A method can be invoked through instances only be specifying the instance
+followed by the method and any arguments. Any class variable altered in this
+function has effect on the associated instance variable only.
+<newlines>
+A special method, the constructor, is invoked automatically when an instance
+is invoked, This method bears the same name as the class. This method may
+accept arguments, but it is best to keep them defaulted in case of inheritance.
+With inheritance, the constructors of all base classes are invoked without
+any argument specified !
+<newlines>
+Similarly, another special method, the destructor, is invoked automatically
+when an instance is deleted. This method bears the same name as the class,
+prepended by the `<bf>~</bf>' symbol. This method does not accept any
+arguments whatsoever.
+</sect>
+
+<sect heading=INHERITANCE>
+A class can inherit methods and variables from other classes (the base or
+parent classes) by specifying these <it>base-classes</it> before the
+class <it>definition</it>. To the user of the class it appears as if these
+inherited variables and methods were defined in the class itself. More
+than one base class can be inherited. If a base class is inherited multiple
+times (e.g. directly or indirectly through the base classes), that base
+class will be considered as one base class only (diamond shaped inheritance).
+</sect>
+
+<sect heading=VIRTUAL>
+Methods defined in base classes can be overridden in derived classes, only
+if they have been prefixed with the <bf>virtual</bf> keyword. When such a
+method is overridden, any invocation of that method (even the ones invoked
+within the base class) will use that method.
+</sect>
+
+<author>
+Stefan Sinnige (ssinnige@geocities.com)
+</author>
+
+<seealso>
+classinfo(n), delete(n), new(n)
+</seealso>
+
+</manpage>
+
+<!-- ======================================================================
+
+     classinfo
+
+     ====================================================================== -->
+
+<manpage basename=classinfo.n>
+
+<title>
+classinfo n 2.0 Tclpp "Tclpp Built-In Commands"
+</title>
+
+<name>
+classinfo \- Obtain information about classes
+</name>
+
+<synopsis>
+<bf>classinfo</bf> <it>option</it> ?<it>arg ...</it>?
+</synopsis>
+
+<description>
+This command provides information about classes. The legal options (which may 
+be abbreviated) are:
+<dl>
+
+<dh><bf>classinfo classes</bf> ?<it>pattern</it>?</dh>
+<dt>Returns a list of fully qualified class names known to the system at
+that point. If <it>pattern</it> is specified, only those names are
+returned which match the <it>pattern</it>.</dt>
+
+<dh><bf>classinfo heritage</bf> <it>class</it></dh>
+<dt>Returns a list of the direct base classes of the <it>class</it>. These
+are only the direct parents of this <it>class</it>, not its entire
+lineage.</dt>
+
+<dh><bf>classinfo methods</bf> <it>class</it></dh>
+<dt>Returns a list of all the methods specified in this <it>class</it>.</dt>
+
+<dh><bf>classinfo variables</bf> <it>class</it></dh>
+<dt>Returns a list of all the variables and associated type specified in this
+<it>class</it>.</dt>
+
+</dl>
+
+</description>
+
+<author>
+Stefan Sinnige (ssinnige@geocities.com)
+</author>
+
+<seealso>
+class(n), objectinfo(n)
+</seealso>
+
+</manpage>
+
+<!-- ======================================================================
+
+     objectinfo
+
+     ====================================================================== -->
+
+<manpage basename=objectinfo.n>
+
+<title>
+objectinfo n 2.0 Tclpp "Tclpp Built-In Commands"
+</title>
+
+<name>
+objectinfo \- Obtain information about objects (instances)
+</name>
+
+<synopsis>
+<bf>objectinfo</bf> <it>object</it> <it>option</it> ?<it>arg ...</it>?
+</synopsis>
+
+<description>
+This command provides information about objects. The legal options (which may 
+be abbreviated) are:
+<dl>
+
+<dh><bf>objectinfo</bf> <it>object</it> <bf>isA</bf></dh>
+<dt>Returns the fully qualified class name (starting with <bf>::</bf>) of
+the <it>object</it>.</dt>
+
+<dh><bf>objectinfo</bf> <it>object</it> <bf>isKindOf</bf> <it>class</it></dh>
+<dt>Returns <it>1</it> if the <it>object</it> is (derived from) <it>class</it>.
+Returns <it>0</it> otherwise.</dt>
+
+</dl>
+
+</description>
+
+<author>
+Stefan Sinnige (ssinnige@geocities.com)
+</author>
+
+<seealso>
+class(n), classinfo(n)
+</seealso>
+
+</manpage>
+
+<!-- ======================================================================
+
+     delete
+
+     ====================================================================== -->
+
+<manpage basename=delete.n>
+
+<title>
+delete n 2.0 Tclpp "Tclpp Built-In Commands"
+</title>
+
+<name>
+delete \- Delete an instance of a class
+</name>
+
+<synopsis>
+<bf>delete</bf> <it>object</it> <newline>
+<it>object</it> <bf>delete</bf> 
+</synopsis>
+
+<description>
+Delete the object entirely (including all its contents) and invoke the
+destructor of the object. The destructor of all its base classes and
+of all its variables will be called as well.
+<newlines>
+Two methods are supported. The first is a command called <bf>delete</bf>
+and the other is calling an instance procedure called <bf>delete</bf>. Both
+are equivalent.
+</description>
+
+<author>
+Stefan Sinnige (ssinnige@geocities.com)
+</author>
+
+<seealso>
+class(n), new(n)
+</seealso>
+
+</manpage>
+
+<!-- ======================================================================
+
+     new
+
+     ====================================================================== -->
+
+<manpage basename=new.n>
+
+<title>
+new n 2.0 Tclpp "Tclpp Built-In Commands"
+</title>
+
+<name>
+new \- Create a new, uniquely named instance of a class
+</name>
+
+<synopsis>
+<bf>new</bf> <it>class</it> ?<it>constructor-arg ...</it>? <newline>
+<it>class</it> <it>object</it> ?<it>constructor-arg ...</it>?
+</synopsis>
+
+<description>
+Construct a new instance of a class and return the instance name created. 
+The constructor of the class will be invoked. The constructors of the
+base classes and all its variables will be called as well.
+<newlines>
+There are two methods to create an instance. The first is using the 
+<bf>new</bf> command which will assign a unique instance name, while the
+other is using the class-name command which requires a user defined
+name. In the latter case, the user has to ensure the uniqueness of the
+instance name.
+</description>
+
+<author>
+Stefan Sinnige (ssinnige@geocities.com)
+</author>
+
+<seealso>
+class(n), delete(n)
+</seealso>
+
+</manpage>
+
+<!-- ======================================================================
+
+     tclppvars
+
+     ====================================================================== -->
+
+<manpage basename=tclppvars.n>
+
+<title>
+tclppvars n 2.0 Tclpp "Tclpp Built-In Commands"
+</title>
+
+<name>
+tclppvars \- Variables used by Tclpp
+</name>
+
+<description>
+The following global variables are created and managed by the Tclpp library.
+All these variables should be treated as read-only by application specific
+code and by users.
+<dl>
+
+<dh><bf>tclpp_patchLevel</bf></dh>
+<dt>Returns the current version and patch level information as a string. For 
+example, <bf>2.0b2</bf> represents the second beta release of release 2.0.</dt>
+
+<dh><bf>tclpp_version</bf></dh>
+<dt>Return the major and minor release number of the current Tclpp release.
+This does not include any patch level information.</dt>
+
+</dl>
+</description>
+
+<author>
+Stefan Sinnige (ssinnige@geocities.com)
+</author>
+
+</manpage>
+
+<!-- ======================================================================
+
+     tclppsh
+
+     ====================================================================== -->
+
+<manpage basename=tclppsh.1>
+
+<title>
+tclppsh 1 2.0 Tclpp "Tclpp Applications"
+</title>
+
+<name>
+tclppsh \- Simple Tcl interpreter shell extended with Tclpp commands
+</name>
+
+<synopsis>
+<bf>tclppsh</bf> ?<it>fileName arg ...</it>? <newline>
+</synopsis>
+
+<description>
+The <bf>tclppsh</bf> is a shell-like application that reads Tcl and Tclpp
+commands from its standard input or from a file and evaluates them.
+If invoked with no arguments then it runs interactively, reading commands
+from standard input and printing command results and error messages
+to standard output.
+It runs until the <bf>exit</bf> command is invoked or until it
+reaches end-of-file on its standard input.
+</description>
+
+<author>
+Stefan Sinnige (ssinnige@geocities.com)
+</author>
+
+<seealso>
+wishpp(1), tclsh(1), wish(1)
+</seealso>
+
+</manpage>
+
+<!-- ======================================================================
+
+     wishpp
+
+     ====================================================================== -->
+
+<manpage basename=wishpp.1>
+
+<title>
+wishpp 1 2.0 Wishpp "Tclpp Applications"
+</title>
+
+<name>
+wishpp \- Simple Tcl windowing shell extended with Tclpp commands
+</name>
+
+<synopsis>
+<bf>wishpp</bf> ?<it>fileName arg ...</it>? <newline>
+</synopsis>
+
+<description>
+The <bf>wishpp</bf> is a windowing shell application that reads Tcl, Tk
+and Tclpp commands from its standard input or from a file and evaluates them.
+If invoked with no arguments then it runs interactively, reading commands
+from standard input and printing command results and error messages
+to standard output.
+It runs until the <bf>exit</bf> command is invoked or until it
+reaches end-of-file on its standard input.
+</description>
+
+<author>
+Stefan Sinnige (ssinnige@geocities.com)
+</author>
+
+<seealso>
+tclppsh(1), tclsh(1), wish(1)
+</seealso>
+
+</manpage>
+
+</man>
+
+<!-- 
+    vi: ts=4 expandtab: 
+  -->

@@ -1,0 +1,302 @@
+# -----------------------------------------------------------------------------
+#
+# class-ctdt.test --
+#     
+#     This file contains tests to validate class ctdt
+#
+# RCS: $Id: class-ctdt.test,v 1.1 1999/09/16 18:13:19 stefan Exp $
+#
+# Copyright (C) 1998-1999, Stefan Sinnige.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#
+# For the full GNU General Public License
+#
+# -----------------------------------------------------------------------------
+
+if {[string compare test [info commands test]] == 1} {
+    error "This test requires the 'tclpptest' shell."
+    exit 1
+}
+
+set SECTION 3.4
+
+# -----------------------------------------------------------------------------
+
+test class-ctdt-R-${SECTION}.1-1 \
+{
+    A constructor is invoked upon creation of an object. The constructor
+    procedue name is equal to the name of the class.
+} \
+{
+    set result ""
+    class A {
+        proc A {} {
+            global result
+            append result "Constructor for $this - "
+        }
+    }
+    A a1
+    A a2
+    set result
+} "Constructor for ::a1 - Constructor for ::a2 - "
+
+# -----------------------------------------------------------------------------
+
+test class-ctdt-R-${SECTION}.1-2 \
+{
+    A constructor is invoked upon creation of an object. The constructor
+    procedue name is equal to the name of the class, even if it is surrounded
+    by a namespace.
+} \
+{
+    set result ""
+    namespace eval Dummy {
+        class A {
+            proc A {} {
+                global result
+                append result "Constructor for $this - "
+            }
+        }
+    }
+    Dummy::A a1
+    set result
+} "Constructor for ::a1 - "
+
+# -----------------------------------------------------------------------------
+
+test class-ctdt-R-${SECTION}.2-1 \
+{
+    An error occurring in the constructor will result in a failed construction
+    of the instance.
+} \
+{
+    class A {
+        proc A {} {
+            error "Simulated Error"
+        }
+    }
+    set result1 [catch {A a1} reason1] 
+    set result2 [catch {a1}   reason2]
+    list $result1 $reason1 \
+         $result2 $reason2
+} "1 {Simulated Error}\
+   1 {invalid command name \"a1\"}"
+
+# -----------------------------------------------------------------------------
+
+test class-ctdt-R-${SECTION}.3-1 \
+{
+    If no constructor specified, the default will be invoked.
+} \
+{
+    class A {
+    }
+    A a
+} "a"
+
+# -----------------------------------------------------------------------------
+
+test class-ctdt-R-${SECTION}.4-1 \
+{
+    Upon instantiation, the instance variable constructors are called before
+    the constructor of the instance itself.
+} \
+{
+    set result ""
+    class A {
+        proc A {} {
+            global result
+            append result "$this - "
+        }
+    }
+    class B {
+        proc B {} {
+            global result
+            append result "$this - "
+        }
+        variable A a
+    }
+    B b
+    set result
+} "::b::B::a - ::b - "
+
+# -----------------------------------------------------------------------------
+
+test class-ctdt-R-${SECTION}.5-1 \
+{
+    A constructor may have arguments.
+} \
+{
+    class A {
+        proc A {value1 value2} {
+            set var1 $value1
+            set var2 $value2
+        }
+        proc getVars {} {
+            list $var1 $var2
+        }
+        variable scalar var1
+        variable scalar var2
+    }
+    A a1 10 20
+    A a2 30 40
+    list [a1 getVars] \
+         [a2 getVars]
+} "{10 20}\
+   {30 40}"
+
+# -----------------------------------------------------------------------------
+
+test class-ctdt-R-${SECTION}.5-2 \
+{
+    A constructor must have default arguments when being used as a
+    class variable. Otherwise an error will be generated
+} \
+{
+    class A {
+        proc A {value1} {
+            set var1 $value1
+        }
+        variable scalar var1
+    }
+
+    class B {
+        variable A a
+    }
+    B b
+} "no value given for parameter \"value1\" to \"A\""
+
+# -----------------------------------------------------------------------------
+
+test class-ctdt-R-${SECTION}.5-3 \
+{
+    A constructor must have default arguments or 'args' when being used as a
+    class variable.
+} \
+{
+    class A {
+        proc A {args} {
+        }
+    }
+
+    class B {
+        variable A a
+    }
+    B b
+} "b"
+
+# -----------------------------------------------------------------------------
+
+test class-ctdt-R-${SECTION}.6-1 \
+{
+    A destructor is invoked upon explicit deletion of an object. The 
+    destructor name equals to the name of the class, prepended with '~'
+} \
+{
+    set result ""
+    class A {
+        proc ~A {} {
+            global result
+            append result "Destructor for $this - "
+        }
+    }
+    A a1
+    a1 delete
+    set result
+} "Destructor for ::a1 - "
+
+# -----------------------------------------------------------------------------
+
+test class-ctdt-R-${SECTION}.6-2 \
+{
+    A destructor does not accept any parameters.
+} \
+{
+    class A {
+        proc ~A {arg} {
+        }
+    }
+} "destructor \"::A::~A\" does not allow arguments"
+
+# -----------------------------------------------------------------------------
+
+test class-ctdt-R-${SECTION}.7-1 \
+{
+    A destructor does not return anything and any error is discarded.
+} \
+{
+    class A {
+        proc ~A {} {
+            error "An error occurred"
+        }
+    }
+    A a1
+    set result [catch {a1 delete} reason]
+    list $result\
+         $reason
+} "0\
+   {}"
+
+# -----------------------------------------------------------------------------
+
+test class-ctdt-R-${SECTION}.8-1 \
+{
+    A destructor is called for each variable of the instance
+} \
+{
+    set result ""
+    class A {
+        proc A {} {
+            global result
+            append result "$this - "
+        }
+    }
+    class B {
+        proc B {} {
+            global result
+            append result "$this - "
+        }
+        variable A a
+    }
+    B b
+    b delete
+    set result
+} "::b::B::a - ::b - "
+
+# -----------------------------------------------------------------------------
+
+test class-ctdt-R-${SECTION}.9-1 \
+{
+    Deleting a namespace which contains instances does NOT call any
+    destructors
+} \
+{
+    set result ""
+    class A {
+        proc ~A {} {
+            global result
+            append result "$this - "
+        }
+    }
+    namespace eval Dummy {
+        ::A a
+    }
+    namespace delete Dummy
+    set result
+} ""
+
+# vi: set ai ts=4 expandtab:
+

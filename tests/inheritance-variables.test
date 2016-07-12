@@ -1,0 +1,187 @@
+# -----------------------------------------------------------------------------
+#
+# inheritance-variables.test --
+#     
+#     This file contains tests to validate inheritance concerning
+#     class variables
+#
+# RCS: $Id: inheritance-variables.test,v 1.2 2000/02/08 17:00:43 stefan Exp $
+#
+# Copyright (C) 1998-1999, Stefan Sinnige.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#
+# For the full GNU General Public License
+#
+# -----------------------------------------------------------------------------
+
+if {[string compare test [info commands test]] == 1} {
+    error "This test requires the 'tclpptest' shell."
+    exit 1
+}
+
+set SECTION 5.2
+
+# -----------------------------------------------------------------------------
+
+test inheritance-variables-R-${SECTION}.1-1 \
+{
+    All the variables of the base classes will be instantiated and will be
+    in their own namespace.
+} \
+{
+    class Base {
+        variable scalar base_member
+    }
+    class Derived : Base {
+        variable scalar derived_member
+    }
+    Derived d
+    list [classinfo variables Base] \
+         [classinfo variables Derived] \
+         [info vars ::d::Base::*] \
+         [info vars ::d::Derived::*]
+} "{{this scalar} {base_member scalar}}\
+   {{this scalar} {derived_member scalar}}\
+   ::d::Base::base_member\
+   ::d::Derived::derived_member"
+
+# -----------------------------------------------------------------------------
+
+test inheritance-variables-R-${SECTION}.2-1 \
+{
+    Variables of classes and base classes do not clash, even though they
+    have the same name. One level inheritance.
+} \
+{
+    class Base1 {
+        variable scalar a
+    }
+    class Base2 {
+        variable scalar a
+    }
+    class Derived : Base1 Base2 {
+        variable scalar a
+    }
+    Derived d
+    list [info vars ::d::Base1::*] \
+         [info vars ::d::Base2::*] \
+         [info vars ::d::Derived::*]
+} "::d::Base1::a\
+   ::d::Base2::a\
+   ::d::Derived::a"
+
+# -----------------------------------------------------------------------------
+
+test inheritance-variables-R-${SECTION}.2-2 \
+{
+    Variables of classes and base classes do not clash, even though they
+    have the same name. Multi level inheritance.
+} \
+{
+    class Base1 {
+        variable scalar a
+    }
+    class Base2 : Base1 {
+        variable scalar a
+    }
+    class Derived : Base2 {
+        variable scalar a
+    }
+    Derived d
+    list [info vars ::d::Base1::*] \
+         [info vars ::d::Base2::*] \
+         [info vars ::d::Derived::*]
+} "::d::Base1::a\
+   ::d::Base2::a\
+   ::d::Derived::a"
+
+# -----------------------------------------------------------------------------
+
+test inheritance-variables-R-${SECTION}.2-3 \
+{
+    There will be only one 'this' variable per instance as ::<instance>::this.
+    One level inheritance.
+} \
+{
+    class Base1 {
+    }
+    class Base2 {
+    }
+    class Derived : Base1 Base2 {
+    }
+    Derived d
+    list [info vars ::d::Base1::this] \
+         [info vars ::d::Base2::this] \
+         [info vars ::d::Derived::this] \
+         [info vars ::d::this]
+} "{}\
+   {}\
+   {}\
+   ::d::this"
+
+# -----------------------------------------------------------------------------
+
+test inheritance-variables-R-${SECTION}.2-4 \
+{
+    There will be only one 'this' variable per instance as ::<instance>::this.
+    Multi level inheritance.
+} \
+{
+    class Base1 {
+    }
+    class Base2 : Base1 {
+    }
+    class Derived : Base2 {
+    }
+    Derived d
+    list [info vars ::d::Base1::this] \
+         [info vars ::d::Base2::this] \
+         [info vars ::d::Derived::this] \
+         [info vars ::d::this]
+} "{}\
+   {}\
+   {}\
+   ::d::this"
+
+# -----------------------------------------------------------------------------
+
+test inheritance-variables-R-${SECTION}.2-5 \
+{
+    Inherited variables are accessible in derived classes.
+} \
+{
+    class Base {
+        variable scalar data
+        proc Base {} {
+            set data "Base"
+        }
+        proc getData {} {
+            return $data
+        }
+    }
+
+    class Derived : Base {
+        proc Derived {} {
+            set data "Derived"
+        }
+    }
+
+    Derived d
+    d getData
+} "Derived"
+
+# vi: set ai ts=4 expandtab:
+

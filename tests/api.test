@@ -1,0 +1,74 @@
+# -----------------------------------------------------------------------------
+#
+# api.test --
+#     
+#     This file contains tests to validate the API
+#
+# RCS: $Id: api.test,v 1.1 1999/09/16 18:13:19 stefan Exp $
+#
+# Copyright (C) 1998-1999, Stefan Sinnige.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#
+# For the full GNU General Public License
+#
+# -----------------------------------------------------------------------------
+
+if {[string compare test [info commands test]] == 1} {
+    error "This test requires the 'tclpptest' shell."
+    exit 1
+}
+
+# -----------------------------------------------------------------------------
+
+test API-1 \
+{
+    Tclpp_CreateClass (interp, fullName, description);
+} \
+{
+    testclass ::A {}
+    list [classinfo classes]    
+} "::A"
+
+
+# -----------------------------------------------------------------------------
+
+test API-2 \
+{
+    Tclpp_CreateInstance (interp, instanceName, classPtr);
+} \
+{
+    class A {}
+    testinstance create ::a ::A
+    list [objectinfo a isA]
+} "::A"
+
+# -----------------------------------------------------------------------------
+
+test API-3 \
+{
+    Tclpp_DeleteInstance (interp, instancePtr);
+} \
+{
+    class A {}
+    A a
+    testinstance delete ::a 
+    list [info commands ::a] \
+         [namespace children :: a]
+} "{}\
+   {}"
+
+# vi: set ai ts=4 expandtab:
+

@@ -1,0 +1,80 @@
+<!-- ==================================================
+
+     FILENAME
+     	man.dtd
+
+     RCSID
+	$Id: man.dtd,v 1.3 2000/05/23 20:46:26 stefan Exp $
+
+
+     AUTHOR
+	Stefan Sinnige <ssinnige@geocities.com>
+
+     COPYRIGHT, LICENSE AND DISCLAIMER
+
+	Copyright (C) 1998-2000, Stefan Sinnige.
+
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU Lesser General Public License as 
+	published by the Free Software Foundation; either version 2.1 of the 
+	License, or (at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Lesser General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, 
+	USA.
+
+	For the full GNU Lesser General Public License, see the 'LICENSE' file.
+
+     ================================================== -->
+
+<!-- ==================================================
+	Entities
+     ================================================== -->
+
+<!entity % breaks " newline | newlines | page " >
+<!entity % emph " em | it | bf | un | tt | code " >
+<!entity % inline " ( #pcdata | %emph; | %breaks; | dl )* " >
+
+<!-- ==================================================
+	Elements
+     ================================================== -->
+
+<!element em - - (%inline)>
+<!element it - - (%inline)>
+<!element bf - - (%inline)>
+<!element un - - (%inline)>
+<!element tt - - (%inline)>
+<!element newline - o empty>
+<!element newlines - o empty>
+<!element page - o empty>
+
+<!element dl - - (dh, dt)*>
+<!element dh - - (%inline)>
+<!element dt - - (%inline)>
+
+<!element man - - (manpage*)>
+<!element manpage - o (title, name, synopsis?, description, sect*, author?, seealso?, bugs?)>
+<!element title - o (%inline)>
+<!element name - o (%inline)>
+<!element synopsis - o (%inline)>
+<!element description - o (%inline)>
+<!element sect - o (%inline)>
+<!element author - o (%inline)>
+<!element seealso - o (%inline)>
+<!element bugs - o (%inline)>
+
+<!-- ==================================================
+	ATTRIBUTE LISTS
+     ================================================== -->
+
+<!attlist manpage
+	  basename cdata #required>
+<!attlist sect
+	  heading cdata #required>
+

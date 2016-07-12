@@ -1,0 +1,107 @@
+%======================================================================
+%
+% = FILENAME
+%	TROFF man mapping for sgmlsasp
+%
+% = RCSID
+%	$Id: mapping,v 1.3 2000/05/23 20:51:34 stefan Exp $
+%
+% = AUTHOR
+%	Stefan Sinnige <ssinnige@geocities.com>
+%
+% = COPYRIGHT, LICENSE AND DISCLAIMER
+%
+%  Copyright (C) 1998-2000, Stefan Sinnige.
+%
+%  This program is free software; you can redistribute it and/or modify
+%  it under the terms of the Lesser GNU General Public License as published
+%  by the Free Software Foundation; either version 2.1 of the License, or
+%  (at your option) any later version.
+%
+%  This program is distributed in the hope that it will be useful,
+%  but WITHOUT ANY WARRANTY; without even the implied warranty of
+%  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%  GNU Lesser General Public License for more details.
+%
+%  You should have received a copy of the GNU General Public License
+%  along with this program; if not, write to the Free Software
+%  Foundation, Inc., 59 Temple Place, Suite 330, Boston MA 02111-1307, USA.
+%
+%  For the full GNU Lesser General Public License, see the 'LICENSE' file.
+%
+%======================================================================
+
+<author>	+	".SH AUTHOR(S)"				+
+</author>		""					+
+
+<bf>			"\\fB"
+</bf>			"\\fR"
+
+<code>		+	".DS"					+
+</code>		+	".DE"					+
+
+<description>	+	".SH DESCRIPTION"			+
+</description>		""					+
+
+<dl>			""
+</dl>		+	".LP"					+
+
+<dh>		+	".TP"					+
+</dh>			""					+
+
+<dt>			""
+</dt>			""					+
+
+<it>			"\\fI"
+</it>			"\\fR"
+
+<manpage>	+	"<@@manpage>[BASENAME]\n"		
+	"'\\\"\n"
+	"'\\\" Copyright (C) 1998-2000, Stefan Sinnige.\n"
+	"'\\\"\n"
+	"'\\\" This program is free software; you can redistribute it and/or\n"
+	"'\\\" modify it under the terms of the GNU Lesser General Public\n"
+	"'\\\" License as published by the Free Software Foundation; either\n"
+	"'\\\" version 2.1 of the License, or (at your option) any later\n"
+	"'\\\" version.\n"
+	"'\\\"\n"
+	"'\\\" This program is distributed in the hope that it will be\n"
+	"'\\\" useful, but WITHOUT ANY WARRANTY; without even the implied\n"
+	"'\\\" warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR\n"
+	"'\\\" PURPOSE. See the GNU Lesser General Public License for more\n"
+	"'\\\" details.\n"
+	"'\\\"\n"
+	"'\\\" You should have received a copy of the GNU Lesser General\n"
+	"'\\\" Public License along with this program; if not, write to the\n"
+	"'\\\" Free Software Foundation, Inc., 59 Temple Place, Suite 330,\n"
+	"'\\\" Boston, MA 02111-1307, USA.\n"
+	"'\\\"\n"
+	"'\\\" For the full GNU Lesser General Public License, see the\n"
+	"'\\\" 'LICENSE' file.\n"
+	"'\\\"\n"
+</manpage>	+	"<@@endmanpage>"			+
+
+<name>		+	".SH NAME"				+
+</name>			""					+
+
+<newline>	+	".br"					
+</newline>		""
+
+<newlines>	+	".sp"					+
+</newlines>		""
+
+<page>		+	".bp"					+
+</page>			""
+
+<sect>		+	".SH [HEADING]"				+
+</sect>			""					+
+
+<seealso>	+	".SH SEE ALSO"				+
+</seealso>		""					+
+
+<synopsis>	+	".SH SYNOPSIS"				+
+</synopsis>		""					+
+
+<title>		+	".TH "
+</title>	+	".BS"					+
+

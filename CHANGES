@@ -1,0 +1,40 @@
+======================================================================
+
+                      Changes for Tclpp package
+
+	          The Tclpp Home Page is located at
+
+           http://www.geocities.com/ssinnige/projects/tclpp/
+
+======================================================================
+
+2.0b2   [Feb 12, 2000]
+	- The object command is now available in constructors
+	- Base class variables accessible in derived classes
+	- Added tclppvars
+	- Added a tclppConfig.sh for easy tclpp extension building
+	- Added pre-build man-pages and html documentation 
+	- Added 'make install'
+
+2.0b1	[Sep 17, 1999]
+	- Redesign in 'C' for better performance and implementation of
+  	  future enhancements
+
+1.2     [Aug 05, 1998]
+	- Added 'new' and 'delete' commands
+	- Added nested class definition
+	- Using pkgIndex.tcl instead of tclIndex for version support
+	- Added MS Windows package
+
+1.1.1	[May 19, 1998]
+	- Corrected passing of multiple arguments to a constructor
+	  Thanks to Alex Rezinsky <alexr@msil.sps.mot.com>
+	- Corrected accessibility of inherited data members
+	  
+1.1	[April 21, 1998]
+	- Released Tclpp version 1.1 using different name to avoid name
+	  clashing with another tcl++ package.
+
+1.0	[April 20, 1998]
+	- Released Tcl++ version 1.0
+	

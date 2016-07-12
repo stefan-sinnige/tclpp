@@ -1,0 +1,355 @@
+#
+# FILENAME
+#	html.resolve-1
+#
+# AUTHOR
+#	Stefan Sinnige <ssinnige@geocities.com>
+#
+# COPYRIGHT, LICENSE AND DISCLAIMER
+#
+#	Copyright (C) 1997-2000, Stefan Sinnige.
+#
+#	This program is free software; you can redistribute it and/or modify
+#	it under the terms of the GNU Lesser General Public License as published
+#	by the Free Software Foundation; either version 2.1 of the License, or
+#	(at your option) any later version.
+#
+#	This program is distributed in the hope that it will be useful,
+#	but WITHOUT ANY WARRANTY; without even the implied warranty of
+#	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#	GNU Lesser General Public License for more details.
+#
+#	You should have received a copy of the GNU Lesser General Public License
+#	along with this program; if not, write to the Free Software
+#	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+#
+#   For the full GNU Lesser General Public License, see the 'LICENSE' file.
+#
+
+#######################################################################
+#
+# TITLE
+#
+# <@@title>
+#	Define the title header.
+#
+#######################################################################
+
+proc title {name} {
+    puts "<HEAD><TITLE>$name</TITLE></HEAD>"
+    puts "<BODY BGCOLOR=#FFFFFF>"
+    puts "<P><CENTER><H1>$name</H1></CENTER></P>"
+}
+
+#######################################################################
+#
+# TABLE OF CONTENTS
+#
+# <@@toc>
+#	The table of contents file is constructed during this first
+#	phase. The second phase command will insert this file into the
+#	final document. So just pass the command to the second phase.
+#
+#######################################################################
+
+proc toc {none} {
+    puts "<@@toc>"
+}
+
+#######################################################################
+#
+# SECTIONING
+#
+# <@@part>   <@@endpart>
+# <@@chapt>  <@@endchapt>
+# <@@sect>   <@@endsect>
+# <@@ssect>  <@@endssect>
+# <@@sssect> <@@endsssect>
+#	Keep track of the current part/chapter/section numbers. A parent
+#	sectnr entity will reset the children's numbers.
+#
+#######################################################################
+
+set sectnr(part)  0
+set sectnr(chapt) 0
+set sectnr(sect)  0
+set sectnr(ssect) 0
+
+proc part {name} {
+    global sectnr toc_out context
+
+    incr sectnr(part)
+    set  sectnr(chapt) 0
+    set  sectnr(sect)  0
+    set  sectnr(ssect) 0
+
+    puts "<P><HR>"
+    puts "<A NAME=\"Part $sectnr(part)\">"
+    puts "<P><CENTER><H1>Part $sectnr(part) $name</H1></CENTER></P>"
+    puts "</A>"
+    puts "<HR><P>"
+
+    puts $toc_out "<P>"
+    puts $toc_out "<DT>Part $sectnr(part)"
+    puts $toc_out "<A HREF=\"#Part $sectnr(part)\">$name"
+    puts $toc_out "</A></DT>"
+    puts $toc_out "<P>"
+    puts $toc_out "<DL>"
+
+    lappend context part
+}
+
+proc endpart {none} {
+    global toc_out context
+
+    puts $toc_out "</DL>"
+
+    set context [lreplace $context end end]
+}
+
+proc chapt {name} {
+    global sectnr toc_out context
+
+    incr sectnr(chapt)
+    set  sectnr(sect)  0
+    set  sectnr(ssect) 0
+
+    if $sectnr(part) {
+        set refname "$sectnr(part).$sectnr(chapt)"
+    } else {
+        set refname "$sectnr(chapt)"
+    }
+
+    puts "<A NAME=\"$refname\"></A>"
+    puts "<H1>$sectnr(chapt) "
+    puts "$name</H1>"
+    puts "<P>"
+
+    puts $toc_out "<DT>$sectnr(chapt)"
+    puts $toc_out "<A HREF=\"#$refname\"> $name"
+    puts $toc_out "</A></DT>"
+    puts $toc_out "<DL>"
+
+    lappend context part
+}
+
+proc endchapt {none} {
+    global toc_out context
+
+    puts $toc_out "</DL>"
+
+    set context [lreplace $context end end]
+}
+
+proc sect {name} {
+    global sectnr toc_out context
+
+    incr sectnr(sect)
+    set  sectnr(ssect) 0
+
+    if $sectnr(part) {
+        set refname "$sectnr(part).$sectnr(chapt).$sectnr(sect)"
+    } else {
+        set refname "$sectnr(chapt).$sectnr(sect)"
+    }
+
+    puts "<A NAME=\"$refname\"></A>"
+    puts "<UL><H3>$sectnr(chapt).$sectnr(sect) "
+    puts "$name</H3></UL>"
+    puts "<P>"
+
+    puts $toc_out "<DT>$sectnr(chapt).$sectnr(sect)"
+    puts $toc_out "<A HREF=\"#$refname\"> $name"
+    puts $toc_out "</A></DT>"
+    puts $toc_out "<DL>"
+
+    lappend context sect
+}
+
+proc endsect {none} {
+    global toc_out context
+
+    puts $toc_out "</DL>"
+
+    set context [lreplace $context end end]
+}
+
+proc ssect {name} {
+    global sectnr toc_out context
+
+    incr sectnr(ssect)
+
+    if $sectnr(part) {
+        set refname "$sectnr(part).$sectnr(chapt).$sectnr(sect).$sectnr(ssect)"
+    } else {
+        set refname "$sectnr(chapt).$sectnr(sect).$sectnr(ssect)"
+    }
+
+    puts "<A NAME=\"$refname\"></A>"
+    puts "<UL><UL><H4>$sectnr(chapt).$sectnr(sect).$sectnr(ssect) "
+    puts "$name</H4></UL></UL>"
+    puts "<P>"
+
+    puts $toc_out "<DT>$sectnr(chapt).$sectnr(sect).$sectnr(ssect)"
+    puts $toc_out "<A HREF=\"#$refname\"> $name"
+    puts $toc_out "</A></DT>"
+    puts $toc_out "<DL>"
+
+    lappend context ssect
+}
+
+proc endssect {none} {
+    global toc_out context
+
+    puts $toc_out "</DL>"
+
+    set context [lreplace $context end end]
+}
+
+proc sssect {name} {
+    global context
+
+    puts "<UL><UL><UL><H6>$name</H6></UL></UL></UL>"
+    puts "<P>"
+
+    lappend context sssect
+}
+
+proc endsssect {none} {
+    global context
+
+    set context [lreplace $context end end]
+}
+
+#######################################################################
+#
+# FIGURES AND TABLES
+#
+# <@@figure>  <@@endfigure>
+#   Keep track of the current context to produce unique IDs.
+# <@@caption> <@@endcaption>
+#   Create a caption, based on the context
+#
+#######################################################################
+
+set figurenr 0
+set tablenr  0
+
+proc figure {none} {
+    global context figurenr
+    incr figurenr
+    lappend context figure
+}
+
+proc endfigure {none} {
+    global context
+    set context [lreplace $context end end]
+}
+
+proc table {none} {
+    global context tablenr
+    incr tablenr
+    lappend context table
+}
+
+proc endtable {none} {
+    global context
+    set context [lreplace $context end end]
+}
+
+proc caption {title} {
+    global context figurenr tablenr
+
+    puts -nonewline "<P><CENTER><I>"
+    switch [lindex $context end] {
+        figure {
+            puts "Figure $figurenr. $title"
+        }
+        table {
+            puts "Table $tablenr. $title"
+        }
+    }
+}
+
+proc endcaption {none} {
+    puts "</I></CENTER></P>"
+}
+
+#######################################################################
+#
+# CROSS REFERENCING
+#
+# <@@newxref>
+#	Define a new cross-reference. The reference id should be
+#	unique. The context of this reference defines the associated
+#	reference number. For example, if defined in a section, it
+#	references the section number; if defined in a figure, it
+#	references the figure number.
+# <@@xref>
+#	Substitute the unique ID by the reference number. Since these
+#   may appear before the actual xref is created, we solve them in
+#   the second round.
+#
+#######################################################################
+
+proc newxref {ref} {
+    global xref context sectnr figurenr xref_out
+
+    if [info exists xref($ref)] {
+        error "Cross reference '$ref' already defined !"
+	exit 1
+    }
+    set nr -
+    switch [lindex $context end] {
+        chapt {
+            if $sectnr(part) {
+                append nr $sectnr(part).
+            }
+            append nr $sectnr(chapt)
+        }
+        sect {
+            if $sectnr(part) {
+                append nr $sectnr(part).
+            }
+            append nr $sectnr(chapt).$sectnr(sect)
+        }
+        ssect {
+            if $sectnr(part) {
+                append nr $sectnr(part).
+            }
+            append nr $sectnr(chapt).$sectnr(sect)
+        }
+        sssect {
+            if $sectnr(part) {
+                append nr $sectnr(part).
+            }
+            append nr $sectnr(chapt).$sectnr(sect).$sectnr(ssect)
+        }
+        figure {
+            set nr $figurenr
+        }
+    }
+    set xref($ref) $nr
+    puts $xref_out "set xref($ref) {$nr}"
+}
+
+proc xref {ref} {
+    puts "<@@xref>$ref"
+}
+
+#######################################################################
+#
+# AUXILIARY FILES
+#
+#######################################################################
+
+if [catch {open "toc.out" "w"} toc_out] {
+    error "Unable to open 'toc.out' for writing."
+    exit 1
+}
+if [catch {open "xref.out" "w"} xref_out] {
+    error "Unable to open 'xref.out' for writing."
+    exit 1
+}
+
+# vi: set ai ts=4 expandtab:

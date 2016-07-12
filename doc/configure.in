@@ -1,0 +1,152 @@
+dnl
+dnl	configure.in --
+dnl
+dnl     This file is the input file used by GNU 'autoconf' to generate
+dnl     the file 'configure', which is run as part of the Tclpp installation
+dnl     to configure the system for the local environment
+dnl
+dnl RCSID: $Id: configure.in,v 1.4 2000/05/23 20:46:26 stefan Exp $
+dnl
+dnl	Copyright (C) 1998-2000, Stefan Sinnige.
+dnl
+dnl	This program is free software; you can redistribute it and/or modify
+dnl	it under the terms of the GNU Lesser General Public License as published
+dnl	by the Free Software Foundation; either version 2.1 of the License, or
+dnl	(at your option) any later version.
+dnl
+dnl	This program is distributed in the hope that it will be useful,
+dnl	but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl	GNU Lesser General Public License for more details.
+dnl
+dnl	You should have received a copy of the GNU Lesser General Public License
+dnl	along with this program; if not, write to the Free Software
+dnl	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+dnl
+dnl	For the full GNU Lesser General Public License, see the 'LICENSE' file.
+dnl
+
+AC_INIT(context.gif)
+nodoc=false
+
+dnl ######################################################################
+dnl
+dnl  DEFAULTS
+dnl
+dnl ######################################################################
+
+dnl ######################################################################
+dnl 
+dnl  CHECKS FOR PROGRAMS
+dnl 
+dnl ######################################################################
+
+dnl ----------------------------------------------------------------------
+dnl
+dnl Check for 'nsgmls'. If that program cannot be found, check for its
+dnl predecessor 'sgmls'.
+dnl
+
+AC_ARG_WITH(
+    nsgmls,
+    [  --with-sgmls=PROG       use PROG as sgml parser],
+    NSGMLS=$withval,
+    NSGMLS=none)
+if test "$NSGMLS" = "none"; then
+    AC_PATH_PROG(NSGMLS, nsgmls, none, $PATH:/usr/local/bin:/usr/bin)
+    if test "$NSGMLS" = "none"; then
+        AC_PATH_PROG(SGMLS, sgmls, none, $PATH:/usr/local/bin:/usr/bin)
+        NSGMLS=$SGMLS
+    fi
+else
+    AC_PATH_PROG(NSGMLS, $NSGMLS, none, $PATH:/usr/local/bin:/usr/bin)
+fi
+if test "$NSGMLS" = "none"; then
+    nodoc=true
+fi
+
+dnl ----------------------------------------------------------------------
+dnl
+dnl Check for 'sgmlsasp'.
+dnl
+
+AC_ARG_WITH(
+    sgmlsasp,
+    [  --with-sgmlsasp=PROG    use PROG as sgml translator],
+    SGMLSASP=$withval,
+    SGMLSASP=none)
+if test "$SGMLSASP" = "none"; then
+    AC_PATH_PROG(SGMLSASP, sgmlsasp, none, $PATH:/usr/local/bin:/usr/bin)
+else
+    AC_PATH_PROG(SGMLSASP, $SGMLSASP, none, $PATH:/usr/local/bin:/usr/bin)
+fi
+if test "$SGMLSASP" = "none"; then
+    nodoc=true
+fi
+
+dnl ######################################################################
+dnl 
+dnl  CHECKS FOR INSTALLATION DIRECTORY
+dnl 
+dnl ######################################################################
+
+dnl ######################################################################
+dnl 
+dnl  CHECKS FOR LIBRARIES
+dnl 
+dnl ######################################################################
+
+dnl ######################################################################
+dnl 
+dnl  HEADER FILES
+dnl 
+dnl ######################################################################
+
+dnl ######################################################################
+dnl 
+dnl  TYPEDEFS
+dnl 
+dnl ######################################################################
+
+dnl ######################################################################
+dnl 
+dnl  STRUCTURES
+dnl 
+dnl ######################################################################
+
+dnl ######################################################################
+dnl 
+dnl  COMPILER CHARACTERISTICS
+dnl 
+dnl ######################################################################
+
+dnl ######################################################################
+dnl 
+dnl  LIBRARY FUNCTIONS
+dnl 
+dnl ######################################################################
+
+dnl ######################################################################
+dnl 
+dnl  OUTPUT
+dnl 
+dnl ######################################################################
+
+dnl if test "$nodoc" = "true"; then
+dnl     ****************************************************************
+dnl     *
+dnl     * Documentation cannot be build. Some programs required for
+dnl     * the creation of the documentation could not be located or
+dnl     * are incorrectly installed.
+dnl     *
+dnl     ****************************************************************
+dnl fi
+
+AC_SUBST(NSGMLS)
+AC_SUBST(SGMLSASP)
+ 
+AC_OUTPUT(
+    Makefile)
+
+dnl vi: set ai expandtab ts=4:
+

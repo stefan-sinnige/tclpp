@@ -1,0 +1,381 @@
+# -----------------------------------------------------------------------------
+#
+# inheritance-virtual.test --
+#     
+#     This file contains tests to validate inheritance concerning
+#     virtual class methods
+#
+# RCS: $Id: inheritance-virtual.test,v 1.1 1999/09/16 18:13:19 stefan Exp $
+#
+# Copyright (C) 1998-1999, Stefan Sinnige.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#
+# For the full GNU General Public License
+#
+# -----------------------------------------------------------------------------
+
+if {[string compare test [info commands test]] == 1} {
+    error "This test requires the 'tclpptest' shell."
+    exit 1
+}
+
+set SECTION 5.4
+
+# -----------------------------------------------------------------------------
+
+test inheritance-methods-R-${SECTION}.1-1 \
+{
+    Only methods can be adorned with the virtual keyword
+} \
+{
+    class Base {
+        virtual proc func {arg1} {
+        }
+    }
+} ""
+
+# -----------------------------------------------------------------------------
+
+test inheritance-methods-R-${SECTION}.1-2 \
+{
+    Only methods can be adorned with the virtual keyword
+} \
+{
+    class Base {
+        virtual variable hello
+    }
+} "wrong # args: should be \"virtual proc name args body\""
+
+# -----------------------------------------------------------------------------
+
+test inheritance-methods-R-${SECTION}.1-2 \
+{
+    Only methods can be adorned with the virtual keyword
+} \
+{
+    class Base {
+        virtual non_proc hello {} {
+        }
+    }
+} "'virtual' keyword not followed by 'proc'"
+
+# -----------------------------------------------------------------------------
+
+test inheritance-methods-R-${SECTION}.2-1 \
+{
+    A derived class can only override a virtual method
+} \
+{
+    class Base {
+        proc func {} {
+            return "Base::func"
+        }
+    }
+    class Derived : Base {
+        virtual proc func {} {
+            return "Derived::func"
+        }
+    }
+} "method \"::Derived::func\" cannot override non-virtual \"::Base::func\""
+
+# -----------------------------------------------------------------------------
+
+test inheritance-methods-R-${SECTION}.2-2 \
+{
+    An instance of the derived class will always invoke the latest overridden
+    method.
+} \
+{
+    class Base {
+        virtual proc virtual_func {} {
+            return "Base::virtual_func"
+        }
+    }
+    class Derived : Base {
+        virtual proc virtual_func {} {
+            return "Derived::virtual_func"
+        }
+    }
+    Base b
+    Derived d
+    list [b virtual_func] \
+         [d virtual_func]
+} "Base::virtual_func\
+   Derived::virtual_func"
+
+# -----------------------------------------------------------------------------
+
+test inheritance-methods-R-${SECTION}.2-3 \
+{
+    An instance of the derived class will always invoke the latest overridden
+    method. Even if it was invoked through the base class.
+} \
+{
+    class Base {
+        virtual proc virtual_func {} {
+            return "Base::virtual_func"
+        }
+        proc callit {} {
+            virtual_func
+        }
+    }
+    class Derived : Base {
+        virtual proc virtual_func {} {
+            return "Derived::virtual_func"
+        }
+    }
+    Base b
+    Derived d
+    list [b callit] \
+         [d callit]
+} "Base::virtual_func\
+   Derived::virtual_func"
+
+# -----------------------------------------------------------------------------
+
+test inheritance-methods-R-${SECTION}.2-4 \
+{
+    An instance of the derived class will always invoke the latest overridden
+    method. Even in complex chained inheritance.
+} \
+{
+    class Base {
+        virtual proc virtual_func {} {
+            return "Base::virtual_func"
+        }
+    }
+    class Derived1 : Base {
+    }
+    class Derived2 : Derived1 {
+        virtual proc virtual_func {} {
+            return "Derived2::virtual_func"
+        }
+    }
+    class Derived3 : Derived2 {
+    }
+    Base b
+    Derived1 d1
+    Derived2 d2
+    Derived3 d3
+    list [b  virtual_func] \
+         [d1 virtual_func] \
+         [d2 virtual_func] \
+         [d3 virtual_func]
+} "Base::virtual_func\
+   Base::virtual_func\
+   Derived2::virtual_func\
+   Derived2::virtual_func"
+
+# -----------------------------------------------------------------------------
+
+test inheritance-methods-R-${SECTION}.3-1 \
+{
+    In case of multiple inheritance, an ambigeous situation can only be
+    relieved when both base classes define the function as virtual AND it
+    is overloaded by the derived class.
+} \
+{
+    class Base1 {
+        virtual proc func {} {
+            return "Base1::func"
+        }
+    }
+    class Base2 {
+        virtual proc func {} {
+            return "Base1::func"
+        }
+    }
+    class Derived : Base1 Base2 {
+    }
+} "method \"::Base1::func\" hides \"::Base2::func\" (Ambiguity)"
+
+# -----------------------------------------------------------------------------
+
+test inheritance-methods-R-${SECTION}.3-2 \
+{
+    In case of multiple inheritance, an ambigeous situation can only be
+    relieved when both base classes define the function as virtual AND it
+    is overloaded by the derived class.
+} \
+{
+    class Base1 {
+        proc func {} {
+            return "Base1::func"
+        }
+    }
+    class Base2 {
+        virtual proc func {} {
+            return "Base1::func"
+        }
+    }
+    class Derived : Base1 Base2 {
+    }
+} "method \"::Base1::func\" hides \"::Base2::func\" (Ambiguity)"
+
+# -----------------------------------------------------------------------------
+
+test inheritance-methods-R-${SECTION}.3-3 \
+{
+    In case of multiple inheritance, an ambigeous situation can only be
+    relieved when both base classes define the function as virtual AND it
+    is overloaded by the derived class.
+} \
+{
+    class Base1 {
+        virtual proc func {} {
+            return "Base1::func"
+        }
+    }
+    class Base2 {
+        proc func {} {
+            return "Base1::func"
+        }
+    }
+    class Derived : Base1 Base2 {
+    }
+} "method \"::Base1::func\" hides \"::Base2::func\" (Ambiguity)"
+
+# -----------------------------------------------------------------------------
+
+test inheritance-methods-R-${SECTION}.3-4 \
+{
+    In case of multiple inheritance, an ambigeous situation can only be
+    relieved when both base classes define the function as virtual AND it
+    is overloaded by the derived class.
+} \
+{
+    class Base1 {
+        proc func {} {
+            return "Base1::func"
+        }
+    }
+    class Base2 {
+        proc func {} {
+            return "Base1::func"
+        }
+    }
+    class Derived : Base1 Base2 {
+    }
+} "method \"::Base1::func\" hides \"::Base2::func\" (Ambiguity)"
+
+# -----------------------------------------------------------------------------
+
+test inheritance-methods-R-${SECTION}.3-5 \
+{
+    In case of multiple inheritance, an ambigeous situation can only be
+    relieved when both base classes define the function as virtual AND it
+    is overloaded by the derived class.
+} \
+{
+    class Base1 {
+        proc func {} {
+            return "Base1::func"
+        }
+    }
+    class Base2 {
+        proc func {} {
+            return "Base1::func"
+        }
+    }
+    class Derived : Base1 Base2 {
+        virtual proc func {} {
+            return "Derived::func"
+        }
+    }
+} "method \"::Derived::func\" cannot override non-virtual \"::Base1::func\""
+
+# -----------------------------------------------------------------------------
+
+test inheritance-methods-R-${SECTION}.3-6 \
+{
+    In case of multiple inheritance, an ambigeous situation can only be
+    relieved when both base classes define the function as virtual AND it
+    is overloaded by the derived class.
+} \
+{
+    class Base1 {
+        virtual proc func {} {
+            return "Base1::func"
+        }
+    }
+    class Base2 {
+        proc func {} {
+            return "Base1::func"
+        }
+    }
+    class Derived : Base1 Base2 {
+        virtual proc func {} {
+            return "Derived::func"
+        }
+    }
+} "method \"::Derived::func\" cannot override non-virtual \"::Base2::func\""
+
+# -----------------------------------------------------------------------------
+
+test inheritance-methods-R-${SECTION}.3-7 \
+{
+    In case of multiple inheritance, an ambigeous situation can only be
+    relieved when both base classes define the function as virtual AND it
+    is overloaded by the derived class.
+} \
+{
+    class Base1 {
+        proc func {} {
+            return "Base1::func"
+        }
+    }
+    class Base2 {
+        virtual proc func {} {
+            return "Base1::func"
+        }
+    }
+    class Derived : Base1 Base2 {
+        virtual proc func {} {
+            return "Derived::func"
+        }
+    }
+} "method \"::Derived::func\" cannot override non-virtual \"::Base1::func\""
+
+# -----------------------------------------------------------------------------
+
+test inheritance-methods-R-${SECTION}.3-8 \
+{
+    In case of multiple inheritance, an ambigeous situation can only be
+    relieved when both base classes define the function as virtual AND it
+    is overloaded by the derived class.
+} \
+{
+    class Base1 {
+        virtual proc func {} {
+            return "Base1::func"
+        }
+    }
+    class Base2 {
+        virtual proc func {} {
+            return "Base1::func"
+        }
+    }
+    class Derived : Base1 Base2 {
+        virtual proc func {} {
+            return "Derived::func"
+        }
+    }
+    Derived d
+    d func
+} "Derived::func"
+
+# vi: set ai ts=4 expandtab:
+

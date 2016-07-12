@@ -1,0 +1,239 @@
+# -----------------------------------------------------------------------------
+#
+# class-variables.test --
+#     
+#     This file contains tests to validate reference section 3.3
+#
+# RCS: $Id: class-variables.test,v 1.2 2000/02/08 17:21:30 stefan Exp $
+#
+# Copyright (C) 1998-1999, Stefan Sinnige.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#
+# For the full GNU General Public License
+#
+# -----------------------------------------------------------------------------
+
+if {[string compare test [info commands test]] == 1} {
+    error "This test requires the 'tclpptest' shell."
+    exit 1
+}
+
+set SECTION 3.2
+
+# -----------------------------------------------------------------------------
+
+test class-variables-R-${SECTION}.1-1 \
+{
+	The class variable should consist of a type and a name. Reports an
+	error when not enough parameters are given.
+} \
+{
+	class A {
+	    variable a
+	}
+} "wrong # args: should be \"variable type name\""
+
+# -----------------------------------------------------------------------------
+
+test class-variables-R-${SECTION}.1-2 \
+{
+	The class variable should consist of a type and a name. Reports an
+	error when too many parameters are given.
+} \
+{
+	class A {
+	    variable scalar a b
+	}
+} "wrong # args: should be \"variable type name\""
+
+# -----------------------------------------------------------------------------
+
+test class-variables-R-${SECTION}.1-3 \
+{
+	The class variable should have a unique name.
+} \
+{
+	class A {
+	    variable scalar a 
+	    variable array  a
+	}
+} "class variable \"a\" already exists"
+
+# -----------------------------------------------------------------------------
+
+test class-variables-R-${SECTION}.2-1 \
+{
+	The class variable can be of type 'scalar'.
+} \
+{
+	class A {
+	    variable scalar a
+	}
+	A a1
+	list [lsort [info vars ::a1::*]] \
+	     [lsort [info vars ::a1::A::*]] \
+	     [lsort [classinfo variables A]]
+} "::a1::this\
+   ::a1::A::a\
+   {{a scalar}\
+   {this scalar}}"
+
+# -----------------------------------------------------------------------------
+
+test class-variables-R-${SECTION}.2-2 \
+{
+	The class variable can be of type 'array'.
+} \
+{
+	class A {
+	    variable array a
+	}
+	A a1
+	list [lsort [info vars ::a1::*]] \
+	     [lsort [info vars ::a1::A::*]] \
+	     [lsort [classinfo variables A]]
+} "::a1::this\
+   ::a1::A::a\
+   {{a array} {this scalar}}"
+
+# -----------------------------------------------------------------------------
+
+test class-variables-R-${SECTION}.2-3 \
+{
+	The class variable can be of type 'class'.
+} \
+{
+	class A {
+	    variable scalar a
+	}
+	class B {
+	    variable A a
+	}
+	B b1
+	list [lsort [info commands ::b1::*]] \
+	     [lsort [info commands ::b1::B::*]] \
+	     [lsort [classinfo variables B]]
+} "{}\
+   ::b1::B::a\
+   {{a A} {this scalar}}"
+
+# -----------------------------------------------------------------------------
+
+test class-variables-R-${SECTION}.2-4 \
+{
+	The class variable can be of any (yet unresolved) class.
+} \
+{
+	class A {
+	    variable B b
+	}
+	lsort [classinfo variables A]
+} "{b B} {this scalar}"
+
+# -----------------------------------------------------------------------------
+
+test class-variables-R-${SECTION}.2-5 \
+{
+	The class variable can be of any (yet unresolved) class, but need to
+	be known upon instantiation.
+} \
+{
+	class A {
+	    variable B b
+	}
+	A a
+} "class \"B\" unknown"
+
+# -----------------------------------------------------------------------------
+
+test class-variables-R-${SECTION}.3-1 \
+{
+	The class variable does not clash with a variable of the same name
+	of a sub-class.
+} \
+{
+	class A {
+	    class B {
+	  	    variable scalar a
+	    }
+	    variable scalar a
+	}
+	A    a
+	A::B b
+	list [lsort [info vars ::a::A::*]] \
+         [lsort [info vars ::b::A::B::*]] \
+	     [lsort [classinfo variables A]] \
+	     [lsort [classinfo variables A::B]]
+} "::a::A::a\
+   ::b::A::B::a\
+   {{a scalar} {this scalar}}\
+   {{a scalar} {this scalar}}"
+
+# -----------------------------------------------------------------------------
+
+test class-variables-R-${SECTION}.3-2 \
+{
+	The class variable does not clash with a variable of the same name
+	outside the class definition
+} \
+{
+	set a 10
+	class A {
+	    variable scalar a
+	}
+	A a
+	list [lsort [info vars ::a]] \
+         [lsort [info vars ::a::A::*]]
+} "::a\
+   ::a::A::a"
+
+# -----------------------------------------------------------------------------
+
+test class-variables-R-${SECTION}.4-1 \
+{
+	The class variable 'this' is pre-allocated and cannot be defined 
+	by the user.
+} \
+{
+	class A {
+	    variable array this
+	}
+} "class variable \"this\" already exists"
+
+# -----------------------------------------------------------------------------
+
+test class-variables-R-${SECTION}.4-2 \
+{
+    The class variable 'this' is available at constructor time.
+} \
+{
+    set result ""
+    class A {
+        variable scalar data
+        proc A {} {
+            set data Hello
+            $this getData
+        }
+        proc getData {} {
+            global result
+            append result $data
+        }
+    }
+    A a
+    set result
+} "Hello"
+
+# vi: set ai ts=4 expandtab:

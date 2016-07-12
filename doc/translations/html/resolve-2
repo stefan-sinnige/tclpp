@@ -1,0 +1,70 @@
+#
+# FILENAME
+#	html.resolve-2
+#
+# AUTHOR
+#	Stefan Sinnige <ssinnige@geocities.com>
+#
+# COPYRIGHT, LICENSE AND DISCLAIMER
+#
+#	Copyright (C) 1997-2000, Stefan Sinnige.
+#
+#	This program is free software; you can redistribute it and/or modify
+#	it under the terms of the GNU General Lesser Public License as published
+#	by the Free Software Foundation; either version 2.1 of the License, or
+#	(at your option) any later version.
+#
+#	This program is distributed in the hope that it will be useful,
+#	but WITHOUT ANY WARRANTY; without even the implied warranty of
+#	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#	GNU Lesser General Public License for more details.
+#
+#	You should have received a copy of the GNU Lesser General Public License
+#	along with this program; if not, write to the Free Software
+#	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+#
+#   For the full GNU Lesser General Public License, see the 'LICENSE' file.
+#
+
+#######################################################################
+#
+# TABLE OF CONTENTS
+#
+# <@@toc>
+#	The first phase has written the TOC file. This phase will insert
+#	the contents at this place.
+#
+#######################################################################
+
+proc toc {none} {
+    puts "<H1>Table of Contents</H1>"
+    if [catch {open "toc.out" "r"} toc_out] {
+        error "Unable to open file 'toc.out'"
+        exit 1
+    }
+    puts "<DL>"
+    while {[gets $toc_out line] != -1} {
+        puts $line
+    }
+    puts "</DL>"
+    close $toc_out
+}
+
+#######################################################################
+#
+# CROSS REFERENCING
+#
+# <@@xref>
+#   Substitute the unique ID for the associated number.  
+#
+#######################################################################
+
+source "./xref.out"
+
+proc xref {ref} {
+    global xref
+    puts $xref($ref)
+}
+
+# vi: set ai ts=4 expandtab:
+

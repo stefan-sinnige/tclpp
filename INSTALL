@@ -1,0 +1,65 @@
+======================================================================
+                  Install instructions for Tclpp
+======================================================================
+
+	1. Requirements
+	2. Configuration
+	   2.1 Unix
+	   2.2 Windows
+
+1. Requirements
+
+    Tclpp requires Tcl version 8.0 or later. Upon configuration, the
+    existence of tclsh with the correct version will be checked. No
+    other requirement exist.
+    Upon compilation, it is requried to have the source distribution
+    of Tcl/Tk installed.
+
+2. Configuration
+
+    2.1 Unix
+
+        From within the "unix" directory, call
+
+	    ./configure
+
+        This will configure the sources according to the system configuration
+        and checks if this system is able to use Tclpp. The following options
+        are useful for fine tuning the configuration:
+
+	    --enable-gcc		force to use the GNU-C compiler
+	    --enable-symbols	build with debugging symbols
+	    --enable-shared		build libtclpp as a shared library
+	    --with-tcl=DIR		use Tcl 8.0 libraries from DIR
+
+        After successful configuration, call
+
+	    make
+
+        to create the Tclpp package index file, documentation and to run all
+        the verification tests.
+
+        The Tcl-shell will be available in the 'src' directory
+    
+        To install the software, call
+
+	    make install
+
+    2.2 Windows
+
+	From within the "win" directory, perform
+
+	    copy makefile.vc makefile
+	
+	and edit this makefile. Only the first part of this makefile need
+	to be changed to match your development environment. The makefile
+	and the sources have been tested with Microsoft Visual C++ version 6.
+	After that, call
+
+	    nmake
+
+	to build the DLL's and the executables. If you wish to make the
+	help files, you should invoke
+
+	    nmake winhelp
+

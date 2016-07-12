@@ -1,0 +1,56 @@
+# 
+# all --
+#
+#    This file contains a top-level script to run all of the Tcl
+#    tests.  Execute it by invoking "source all" when running tclppsh
+#    in this directory. 
+#
+# RCS: $Id: all,v 1.2 2000/02/11 20:58:27 stefan Exp $
+#
+# Copyright (C) 1998-1999, Stefan Sinnige.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#
+# For the full GNU General Public License, see the 'LICENSE' file.
+#
+
+set tests [list                 \
+    basic.test                  \
+    class-names.test            \
+    class-methods.test          \
+    class-variables.test        \
+    class-ctdt.test             \
+    class-scoping.test          \
+    instance-names.test         \
+    instance-variables.test     \
+    instance-methods.test       \
+    instance-scoping.test       \
+    inheritance-basics.test     \
+    inheritance-ctdt.test       \
+    inheritance-variables.test  \
+    inheritance-methods.test    \
+    inheritance-virtual.test    \
+    api.test                    \
+]
+
+foreach i $tests {
+    puts stdout $i
+    if [catch {source $i} msg] {
+        puts $msg
+    }
+}
+
+# vi: set expandtab ts=4:
+

@@ -1,0 +1,275 @@
+#
+# Makefile --
+#
+#    This Makefile creates the Tclpp extension library.
+#
+# RCSID: $Id: makefile.vc,v 1.4 2000/06/29 21:53:49 stefan Exp $
+#
+# Copyright (C) 1998-2000, Stefan Sinnige.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation; either version 2.1 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+#
+# For the full GNU Lesser General Public License, see the 'LICENSE' file.
+#
+
+# ----------------------------------------------------------------------------
+# The following specifies the location of the top-level source directory
+# from which Tcl was built. 
+# ----------------------------------------------------------------------------
+
+TCLTKVERSION    = 83
+TCLTKDOTVERSION = 8.3
+
+TCL_SRC_DIR     = ..\..\tcl$(TCLTKDOTVERSION)
+TK_SRC_DIR      = ..\..\tk$(TCLTKDOTVERSION)
+
+# ----------------------------------------------------------------------------
+# The following definitions specify the environment of the Visual C++ 
+# development tools.
+# ----------------------------------------------------------------------------
+
+TOOLS32    = D:\progra~1\micros~1\vc98
+TOOLS32_RC = D:\progra~1\micros~1\common\msdev98
+TOOLS32_HC = D:\progra~1\micros~1\common\tools
+
+CC32       = $(TOOLS32)\bin\cl.exe
+RC32       = $(TOOLS32_RC)\bin\rc.exe
+HCRTF      = $(TOOLS32_HC)\hcrtf.exe
+LINK32     = $(TOOLS32)\bin\link.exe
+LIB32      = $(TOOLS32)\bin\lib.exe
+
+# ----------------------------------------------------------------------------
+# Extra compilation controls
+# ----------------------------------------------------------------------------
+
+NODEBUG     = 1
+
+# ============================================================================
+#
+# YOU DO NOT HAVE TO CHANGE ANYTHING BEYOND THIS POINT
+#
+# ============================================================================
+
+VERSION    = 20
+DOTVERSION = 2.0
+
+# ----------------------------------------------------------------------------
+# Default top-level directories and sub directories. The ROOT points 
+# to the top level source directory.
+# ----------------------------------------------------------------------------
+
+ROOT        = ..
+GENERICDIR  = $(ROOT)\generic
+TESTSDIR    = $(ROOT)\tests
+WINDIR      = $(ROOT)\win
+DOCDIR      = $(ROOT)\doc
+
+!IF "$(NODEBUG)" == "1"
+TMPDIR         = Release
+DBGX           =
+CFLAGS_DEBUG   =
+LFLAGS_DEBUG   =
+!ELSE
+TMPDIR         = Debug
+DBGX           = d
+CFLAGS_DEBUG   = -Zi -ZI -GZ
+LFLAGS_DEBUG   = -debug
+!ENDIF
+
+# ----------------------------------------------------------------------------
+# The following definition can be set to non-null for special systems
+# like AFS with replication.  It allows the pathnames used for installation
+# to be different than those used for actually reference files at
+# run-time.  INSTALL_ROOT is prepended to $prefix and $exec_prefix
+# when installing files.
+# ----------------------------------------------------------------------------
+
+INSTALL_ROOT =
+
+# ----------------------------------------------------------------------------
+# Directory in which to install the binaries and libraries
+# ----------------------------------------------------------------------------
+
+INSTALL         = ..\config\install-sh
+BIN_INSTALL_DIR = $(INSTALL_ROOT)$(exec_prefix)/bin
+LIB_INSTALL_DIR = $(INSTALL_ROOT)$(exec_prefix)/lib
+
+# ----------------------------------------------------------------------------
+# To change the compiler switches, for example to change from optimization to
+# debugging symbols, change the following lines:
+# ----------------------------------------------------------------------------
+
+CFLAGS_WARNING = -W3
+CFLAGS_INCLUDE = -I$(GENERICDIR) -I$(TCL_SRC_DIR)\generic -I$(TOOLS32)\include
+CFLAGS_MISC    = -Gs -GD -nologo -YX -MD 
+CFLAGS         = $(CFLAGS_DEBUG) $(CFLAGS_WARNING) $(CFLAGS_INCLUDE) \
+                 $(CFLAGS_MISC)
+CFLAGS_TK      = -I$(TK_SRC_DIR)\generic -I$(TK_SRC_DIR)\xlib -DWITH_TK
+
+DLLLFLAGS      = $(LFLAGS_DEBUG) /NODEFAULTLIB /RELEASE /NOLOGO /MACHINE:IX86 \
+	 	         -entry:_DllMainCRTStartup@12 -dll
+CONLFLAGS      = $(LFLAGS_DEBUG) /NODEFAULTLIB /RELEASE /NOLOGO /MACHINE:IX86 \
+                 -entry:mainCRTStartup -subsystem:console
+GUILFLAGS      = /NODEFAULTLIB /RELEASE /NOLOGO /MACHINE:IX86 \
+                 -entry:WinMainCRTStartup -subsystem:windows
+
+# ----------------------------------------------------------------------------
+# The library to create, both for static as for shared compilation.
+# ----------------------------------------------------------------------------
+
+TCLPPDLLNAME = tclpp$(VERSION)$(DBGX).dll 
+TCLPPLIBNAME = tclpp$(VERSION)$(DBGX).lib 
+TCLPPDLL     = $(TMPDIR)\$(TCLPPDLLNAME)
+TCLPPLIB     = $(TMPDIR)\$(TCLPPLIBNAME)
+
+# ----------------------------------------------------------------------------
+# The binaries to create
+# ----------------------------------------------------------------------------
+
+TCLPPSH      = $(TMPDIR)\tclppsh$(VERSION)$(DBGX).exe
+WISHPP       = $(TMPDIR)\wishpp$(VERSION)$(DBGX).exe
+
+# ----------------------------------------------------------------------------
+# Tcl libraries built with optimization switches have this additional extension
+# ----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
+# Additional libraries to use when linking.  
+# ----------------------------------------------------------------------------
+
+TCLLIB     = $(TCL_SRC_DIR)\win\$(TMPDIR)\tcl$(TCLTKVERSION)$(DBGX).lib
+TCLSTUBLIB = $(TCL_SRC_DIR)\win\$(TMPDIR)\tclstub$(TCLTKVERSION)$(DBGX).lib
+TCLDLL     = $(TCL_SRC_DIR)\win\$(TMPDIR)\tcl$(TCLTKVERSION)$(DBGX).dll
+TKLIB      = $(TK_SRC_DIR)\win\$(TMPDIR)\tk$(TCLTKVERSION)$(DBGX).lib
+TKDLL      = $(TK_SRC_DIR)\win\$(TMPDIR)\tk$(TCLTKVERSION)$(DBGX).dll
+
+LIBC       = libc.lib oldnames.lib
+LIBCDLL    = msvcrt.lib oldnames.lib
+BASELIBS   = kernel32.lib advapi32.lib user32.lib
+WINLIBS    = $(BASELIBS) gdi32.lib comdlg32.lib winspool.lib
+
+GUILIBS    = $(LIBC) $(WINLIBS)
+CONLIBS    = $(LIBS) $(BASELIBS)
+GUILIBSDLL = $(LIBCDLL) $(WINLIBS)
+CONLIBSDLL = $(LIBCDLL) $(BASELIBS)
+
+# ----------------------------------------------------------------------------
+# The information below should be usable as is.  The configure script won't
+# modify it and you shouldn't need to modify it either.
+# ----------------------------------------------------------------------------
+
+SRCS        = \
+	      $(GENERICDIR)\tclppInit.c		\
+	      $(GENERICDIR)\tclppClass.c	\
+	      $(GENERICDIR)\tclppInfo.c		\
+	      $(GENERICDIR)\tclppMethod.c	\
+	      $(GENERICDIR)\tclppInstance.c	\
+	      $(GENERICDIR)\tclppVariable.c	\
+	      $(WINDIR)\tclppWin32Dll.c
+
+TCLPPOBJS   = \
+	      $(TMPDIR)\tclppInit.obj		\
+	      $(TMPDIR)\tclppClass.obj		\
+	      $(TMPDIR)\tclppInfo.obj		\
+	      $(TMPDIR)\tclppMethod.obj		\
+	      $(TMPDIR)\tclppInstance.obj	\
+	      $(TMPDIR)\tclppVariable.obj 	\
+	      $(TMPDIR)\tclppWin32Dll.obj
+
+DLLLIBS = msvcrt.lib oldnames.lib kernel32.lib advapi32.lib user32.lib \
+          gdi32.lib comdlg32.lib winspool.lib
+
+# ----------------------------------------------------------------------------
+#
+# RULES 
+#
+# ----------------------------------------------------------------------------
+
+all: setup $(TCLPPDLL) $(TCLPPSH) $(WISHPP)
+
+setup:
+	if not exist $(TMPDIR) mkdir $(TMPDIR)
+	
+$(TCLPPLIB): $(TCLPPDLL)
+
+$(TCLPPDLL): $(TCLPPOBJS) $(TMPDIR)\tclpp.res
+	del $(TCLPPDLL)
+	set LIB=$(TOOLS32)\lib
+	$(LINK32) $(DLLLFLAGS) -out:$@ $(TMPDIR)\tclpp.res \
+                $(TCLLIB) $(GUILIBSDLL) @<< 
+		$(TCLPPOBJS)		
+<<
+
+$(TCLPPSH): $(TCLPPLIB) $(TMPDIR)\tclppsh.res
+    $(CC32) -c $(CFLAGS) -Fo$(TMPDIR)\tclAppInit.obj tclAppInit.c
+    $(LINK32) $(CONLFLAGS) $(TMPDIR)\tclppsh.res -stack:2300000 \
+        -out:$@ $(CONLIBSDLL) $(TCLLIB) $(TCLPPLIB) $(TMPDIR)\tclAppInit.obj
+
+$(WISHPP): $(TCLPPLIB) $(TMPDIR)\wishpp.res
+    $(CC32) -c $(CFLAGS) $(CFLAGS_TK) -Fo$(TMPDIR)\tclAppInit.obj tclAppInit.c
+    $(LINK32) $(GUILFLAGS) $(TMPDIR)\wishpp.res -stack:2300000 \
+        -out:$@ $(GUILIBSDLL) $(TKLIB) $(TCLLIB) $(TCLPPLIB) \
+        $(TMPDIR)\tclAppInit.obj
+
+tclpptest: tclppTest.o $(TCLPP_LIB_FILE)
+	$(CC32) @TCL_LD_FLAGS@ tclppTest.o @TCLPP_BUILD_LIB_SPEC@ \
+		$(LIBS) $(LD_SEARCH_FLAGS) -o tclpptest
+
+test: tclpptest
+	( echo cd ../tests\; source all) | ./tclpptest
+
+install: $(TCLPP_LIB_FILE) tclppsh
+	$(INSTALL) $(TCLPP_LIB_FILE) $(LIB_INSTALL_DIR)
+	$(INSTALL) tclppConfig.sh $(LIB_INSTALL_DIR)
+	$(INSTALL) tclppsh $(BIN_INSTALL_DIR)
+	
+clean:
+	del *.obj
+
+distclean: clean
+
+#
+# Windows Help Files, using the tools from the Tcl distribution
+#
+
+TCLTOOLS = $(TCL_SRC_DIR)\tools
+TCLPPHPJ = $(WINDIR)\tclpp.hpj
+TCLPPRTF = $(WINDIR)\tclpp.rtf
+MAN2TCL  = $(TMPDIR)\man2tcl.exe
+MAN2HELP = $(TCLTOOLS)\man2help.tcl
+
+winhelp: $(TCLPPRTF)
+    start /wait $(HCRTF) -xn $(TCLPPHPJ)
+
+$(TCLPPRTF): $(MAN2TCL) $(TCLPPSH)
+    $(TCLPPSH) $(MAN2HELP) tclpp $(VERSION) $(DOCDIR)
+
+$(MAN2TCL): $(TCLTOOLS)\man2tcl.c
+    $(CC32) -nologo -G4 -ML -Fe$(MAN2TCL) $(TCLTOOLS)\man2tcl.c
+    
+#
+# Implicit Rules
+#
+
+{$(GENERICDIR)}.c{$(TMPDIR)}.obj:
+	$(CC32) -c -DBUILD_tclpp $(CFLAGS) -Fo$(TMPDIR)\ $<
+
+{$(WINDIR)}.c{$(TMPDIR)}.obj:
+	$(CC32) -c -DBUILD_tclpp $(CFLAGS) -Fo$(TMPDIR)\ $<
+
+{$(WINDIR)}.rc{$(TMPDIR)}.res:
+	$(RC32) -fo $@ -r -i $(GENERICDIR) -i $(TCL_SRC_DIR)\generic -D__WIN32__ $<
+
+# vi: set ai ts=4 expandtab:

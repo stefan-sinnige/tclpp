@@ -1,0 +1,142 @@
+# -----------------------------------------------------------------------------
+#
+# instance-methods.test --
+#     
+#     This file contains tests to validate class methods
+#
+# RCS: $Id: instance-methods.test,v 1.1 1999/09/16 18:13:20 stefan Exp $
+#
+# Copyright (C) 1998-1999, Stefan Sinnige.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#
+# For the full GNU General Public License
+#
+# -----------------------------------------------------------------------------
+
+if {[string compare test [info commands test]] == 1} {
+    error "This test requires the 'tclpptest' shell."
+    exit 1
+}
+
+set SECTION 4.3
+
+# -----------------------------------------------------------------------------
+
+test instance-methods-R-${SECTION}.1-1 \
+{
+    Class methods are invoked through the instances. Test without arguments.
+} \
+{
+    class A {
+        proc message {} {
+            return "hello world"
+        }
+    }
+    A a
+    a message 
+} "hello world"
+
+# -----------------------------------------------------------------------------
+
+test instance-methods-R-${SECTION}.1-2 \
+{
+    Class methods are invoked through the instances. Test with arguments.
+} \
+{
+    class A {
+        proc message {arg1 arg2} {
+            return "$arg1 $arg2"
+        }
+    }
+    A a
+    a message hello world
+} "hello world"
+
+# -----------------------------------------------------------------------------
+
+test instance-methods-R-${SECTION}.1-3 \
+{
+    Class methods are invoked through the instances. Test with default 
+    arguments.
+} \
+{
+    class A {
+        proc message {arg1 {arg2 world}} {
+            return "$arg1 $arg2"
+        }
+    }
+    A a
+    a message hello 
+} "hello world"
+
+# -----------------------------------------------------------------------------
+
+test instance-methods-R-${SECTION}.1-4 \
+{
+    Class methods are invoked through the instances. Test with 'args'
+    argument.
+} \
+{
+    class A {
+        proc message {arg1 args} {
+            return "$arg1 $args"
+        }
+    }
+    A a
+    a message hello world !
+} "hello world !"
+
+# -----------------------------------------------------------------------------
+
+test instance-methods-R-${SECTION}.2-1 \
+{
+    Class methods can invoke other class methods by normal invocation.
+} \
+{
+    class A {
+        proc func1 {} {
+            return "hello world"
+        }
+        proc func2 {} {
+            func1
+        }
+    }
+    A a
+    a func2
+} "hello world"
+
+# -----------------------------------------------------------------------------
+
+test instance-methods-R-${SECTION}.2-2 \
+{
+    Class methods can invoke other class methods by using the old method
+    of specifying the 'this' pointer.
+} \
+{
+    class A {
+        proc func1 {} {
+            return "hello world"
+        }
+        proc func2 {} {
+            $this func1
+        }
+    }
+    A a
+    a func2
+} "hello world"
+
+# vi: set ai ts=4 expandtab:
+
