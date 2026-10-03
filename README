@@ -2,9 +2,7 @@
 
                     Readme instructions for Tclpp
 
-	          The Tclpp Home Page is located at
-
-          http://www.geocities.com/ssinnige/projects/tclpp/
+               http://github.com/stefan-sinnige/tclpp
 
 ======================================================================
 
@@ -23,17 +21,7 @@
 
     For compilation and installation, see the 'INSTALL' file.
 
-3. Author and Bug Reports
-
-    This software package is implemented by Stefan Sinnige. You can
-    reach him at
-
-    		ssinnige@geocities.com
-
-    If you find any problems, bugs or have suggestions, please send an
-    e-mail to (one of) the addresses above.
-
-4. Copyright and Licensing
+3. Copyright and Licensing
 
     This notice applies to all files in this software distribution !
 
